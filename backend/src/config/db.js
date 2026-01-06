@@ -1,6 +1,7 @@
-// src/config/db.js
-require('dotenv').config();
 const { Pool } = require('pg');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -10,10 +11,8 @@ const pool = new Pool({
   database: process.env.DB_NAME,
 });
 
-// 연결 에러 로그 출력
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
-});
+pool.connect()
+  .then(() => console.log('✅ PostgreSQL Connected!'))
+  .catch(err => console.error('❌ DB Connection Error:', err));
 
 module.exports = pool;

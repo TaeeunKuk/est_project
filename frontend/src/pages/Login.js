@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import '../assets/styles/main.scss';
 
 const Login = () => {
@@ -8,20 +8,20 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // 로그인 시도
-    const result = await login(email, password);
-    
-    if (result.success) {
-      navigate('/'); // 대시보드로 이동
-    } else {
-      setError(result.message);
+    try {
+      const success = await login(email, password);
+      if (success) {
+        navigate('/dashboard'); // 로그인 성공 시 대시보드로 이동
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || '이메일 또는 비밀번호를 확인해주세요.');
     }
   };
 
@@ -34,14 +34,14 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           <input 
             type="email" 
-            placeholder="이메일 (test@example.com)" 
+            placeholder="이메일" 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
           <input 
             type="password" 
-            placeholder="비밀번호 (password123)" 
+            placeholder="비밀번호" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

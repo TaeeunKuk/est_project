@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const CategoryManager = ({ categories, onAddCategory, onDeleteCategory }) => {
+const CategoryManager = ({ categories = [], onAddCategory, onDeleteCategory }) => {
   const [newCatName, setNewCatName] = useState('');
 
   const handleAdd = () => {
@@ -11,25 +11,26 @@ const CategoryManager = ({ categories, onAddCategory, onDeleteCategory }) => {
 
   return (
     <div className="category-manager">
-      <h3>카테고리 관리</h3>
-      <div className="cat-input-group">
+      <h3 style={{ fontSize: '1.1rem', marginBottom: '15px' }}>카테고리 관리</h3>
+      <div className="input-group" style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
         <input 
           type="text" 
-          placeholder="새 카테고리 추가" 
           value={newCatName}
           onChange={(e) => setNewCatName(e.target.value)}
+          placeholder="새 카테고리" 
+          style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e0' }}
         />
-        <button className="btn-primary" onClick={handleAdd}>추가</button>
+        <button onClick={handleAdd} className="btn-primary">추가</button>
       </div>
-      <ul className="cat-list">
+      <div className="cat-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         {categories.map(cat => (
-          <li key={cat.id} className="cat-chip">
-            <span className="color-dot" style={{backgroundColor: cat.color}}></span>
+          <span key={cat.id} className="cat-chip" style={{ display: 'flex', alignItems: 'center', backgroundColor: '#edf2f7', padding: '4px 10px', borderRadius: '20px', fontSize: '0.85rem' }}>
+            <span style={{ width: '8px', height: '8px', backgroundColor: cat.color, borderRadius: '50%', marginRight: '6px' }}></span>
             {cat.title}
-            <button className="btn-del-cat" onClick={() => onDeleteCategory(cat.id)}>&times;</button>
-          </li>
+            <button onClick={() => onDeleteCategory(cat.id)} style={{ marginLeft: '6px', border: 'none', background: 'none', cursor: 'pointer', color: '#a0aec0' }}>&times;</button>
+          </span>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

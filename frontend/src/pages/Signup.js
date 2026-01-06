@@ -1,6 +1,6 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { signUp } from '../api';
 import '../assets/styles/main.scss';
 
 const Signup = () => {
@@ -11,8 +11,6 @@ const Signup = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-  
-  const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,20 +21,21 @@ const Signup = () => {
     e.preventDefault();
     setError('');
 
-    // 유효성 검사
     if (formData.password !== formData.confirmPassword) {
       setError('비밀번호가 일치하지 않습니다.');
       return;
     }
 
-    // 회원가입 시도
-    const result = await signup(formData.email, formData.password, formData.name);
-
-    if (result.success) {
+    try {
+      await signUp({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name
+      });
       alert('회원가입이 완료되었습니다. 로그인해주세요.');
       navigate('/login');
-    } else {
-      setError('회원가입 실패: 다시 시도해주세요.');
+    } catch (err) {
+      setError(err.response?.data?.message || '회원가입 실패: 다시 시도해주세요.');
     }
   };
 

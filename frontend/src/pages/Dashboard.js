@@ -1,202 +1,136 @@
-// src/pages/Dashboard.js
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getTodos, createTodo, updateTodo, deleteTodo } from '../api';
 
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import CategoryManager from '../components/CategoryManager';
-import TodoList from '../components/schedule/TodoList';
+// 컴포넌트 불러오기 (경로를 본인의 환경에 맞게 확인하세요)
 import Calendar from '../components/schedule/Calendar';
-import { mockTodos, mockCategories } from '../api/mockData';
-import '../assets/styles/main.scss';
+import TodoList from '../components/schedule/TodoList';
+import CategoryManager from '../components/CategoryManager';
 
 const Dashboard = () => {
-  // --- Context: 로그인 유저 정보 및 로그아웃 함수 가져오기 ---
-  const { user, logout } = useContext(AuthContext);
-
-  // --- State Management ---
-  const [todos, setTodos] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const { user, logout } = useAuth();
   
-  // 날짜 및 뷰 상태
-  // 기본값: 오늘 날짜 (YYYY-MM-DD 형식)
+  // --- 상태 관리 ---
+  const [todos, setTodos] = useState([]);
+  const [categories, setCategories] = useState([
+    { id: 1, title: '업무', color: '#4299e1' },
+    { id: 2, title: '개인', color: '#48bb78' },
+    { id: 3, title: '긴급', color: '#e53e3e' }
+  ]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [filterType, setFilterType] = useState('daily'); // 'daily' | 'weekly'
+  const [filterType, setFilterType] = useState('daily'); // daily 또는 weekly
 
-  // --- Initial Data Load ---
-  useEffect(() => {
-    /* TODO: [Backend Integration] 
-      1. GET /api/todos (Redis 세션/JWT 토큰으로 유저 식별)
-      2. GET /api/categories
-      
-      DB 연결 전이므로 더미 데이터 사용
-    */
-    setTodos(mockTodos);
-    setCategories(mockCategories);
+  // --- 데이터 로딩 (READ) ---
+  const fetchTodos = useCallback(async () => {
+    try {
+      const data = await getTodos();
+      setTodos(data);
+    } catch (err) {
+      console.error('데이터 로드 실패:', err);
+    }
   }, []);
 
-  // --- Helper: 주간 날짜 계산 로직 ---
-  const getWeekDates = (dateStr) => {
-    const curr = new Date(dateStr);
-    const day = curr.getDay(); // 0(일) ~ 6(토)
-    const diff = curr.getDate() - day; 
-    const sunday = new Date(curr.setDate(diff));
-    
-    let week = [];
-    for (let i = 0; i < 7; i++) {
-      let d = new Date(sunday);
-      d.setDate(sunday.getDate() + i);
-      week.push(d.toISOString().split('T')[0]); // YYYY-MM-DD
-    }
-    return week;
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+
+  // --- 일정 조작 함수들 (CUD) ---
+  
+  // 1. 추가
+  const handleAddTodo = async (title, categoryId) => {
+    try {
+      await createTodo({ title, categoryId, date: selectedDate });
+      fetchTodos();
+    } catch (err) { alert('추가 중 오류가 발생했습니다.'); }
   };
 
-  // --- Logic: Todo 필터링 (일간/주간) ---
-  const getFilteredTodos = () => {
-    if (filterType === 'daily') {
-      return todos.filter(t => t.date === selectedDate);
-    } else {
-      // Weekly Filter
-      const weekDates = getWeekDates(selectedDate);
-      return todos.filter(t => weekDates.includes(t.date));
-    }
+  // 2. 토큰/완료 상태 변경
+  const handleToggleTodo = async (id) => {
+    const target = todos.find(t => t.id === id);
+    if (!target) return;
+    try {
+      await updateTodo(id, { isCompleted: !target.isCompleted });
+      fetchTodos();
+    } catch (err) { console.error('수정 실패:', err); }
   };
 
-  // --- Handler: 오늘 날짜로 이동 ---
-  const handleGoToToday = () => {
+  // 3. 내용 수정
+  const handleUpdateText = async (id, newTitle) => {
+    try {
+      await updateTodo(id, { title: newTitle });
+      fetchTodos();
+    } catch (err) { console.error('내용 수정 실패:', err); }
+  };
+
+  // 4. 삭제
+  const handleDeleteTodo = async (id) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    try {
+      await deleteTodo(id);
+      fetchTodos();
+    } catch (err) { console.error('삭제 실패:', err); }
+  };
+
+  // 5. 오늘 날짜로 이동 (TodoList의 onGoToday 연결)
+  const handleGoToday = () => {
     const today = new Date().toISOString().split('T')[0];
     setSelectedDate(today);
     setFilterType('daily');
   };
 
-  // --- Handlers: Todo CRUD ---
+  // --- 필터링 로직 ---
+  const filteredTodos = todos.filter(todo => {
+    if (filterType === 'daily') {
+      return todo.date === selectedDate;
+    } else {
+      // 간단한 주간 필터 (실제 구현 시 현재 주의 시작~끝 계산 로직 추가 권장)
+      return true; // 주간 보기 시 전체 출력 혹은 로직 적용
+    }
+  });
 
-  // 1. 할 일 등록
-  const handleAddTodo = (text, categoryId) => {
-    const newTodo = {
-      id: Date.now(), // 임시 ID
-      title: text,
-      date: selectedDate, // 현재 선택된 날짜에 등록
-      isCompleted: false,
-      categoryId: Number(categoryId)
-    };
-
-    /* TODO: [POST] /api/todos
-      Body: { title: text, date: selectedDate, categoryId }
-    */
-    setTodos([...todos, newTodo]);
-  };
-
-  // 2. 할 일 수정
-  const handleUpdateTodo = (id, newText) => {
-    /* TODO: [PATCH] /api/todos/:id
-      Body: { title: newText }
-    */
-    setTodos(todos.map(t => t.id === id ? { ...t, title: newText } : t));
-  };
-
-  // 3. 할 일 완료/미완료 토글
-  const handleToggleTodo = (id) => {
-    /* TODO: [PATCH] /api/todos/:id/status
-      Body: { isCompleted: !currentStatus }
-    */
-    setTodos(todos.map(t => 
-      t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
-    ));
-  };
-
-  // 4. 할 일 삭제
-  const handleDeleteTodo = (id) => {
-    /* TODO: [DELETE] /api/todos/:id
-    */
-    setTodos(todos.filter(t => t.id !== id));
-  };
-
-  // --- Handlers: Category CRUD ---
-
-  // 1. 카테고리 추가
-  const handleAddCategory = (name) => {
-    const newCat = {
-      id: Date.now(),
-      title: name,
-      // 랜덤 색상 생성 (Hex Code)
-      color: '#' + Math.floor(Math.random()*16777215).toString(16)
-    };
-
-    /* TODO: [POST] /api/categories
-      Body: { title: name, color: ... }
-    */
-    setCategories([...categories, newCat]);
-  };
-
-  // 2. 카테고리 삭제
-  const handleDeleteCategory = (id) => {
-    /* TODO: [DELETE] /api/categories/:id
-      DB 설계 시 ON DELETE SET NULL로 설정했으므로,
-      프론트에서도 해당 카테고리를 가진 Todo의 categoryId를 null로 바꾸거나,
-      단순히 카테고리 목록에서만 제거하고 재조회할 수 있음.
-    */
-    setCategories(categories.filter(c => c.id !== id));
-  };
-
-  // --- Render ---
   return (
     <div className="dashboard-container">
-      {/* --- 좌측 사이드바: 카테고리 관리 & 달력 --- */}
+      {/* 좌측 사이드바 영역 */}
       <aside className="sidebar">
         <CategoryManager 
           categories={categories}
-          onAddCategory={handleAddCategory}
-          onDeleteCategory={handleDeleteCategory}
+          onAddCategory={(name) => setCategories([...categories, { id: Date.now(), title: name, color: '#a0aec0' }])}
+          onDeleteCategory={(id) => setCategories(categories.filter(c => c.id !== id))}
         />
         
-        {/* 달력: 날짜 선택 시 해당 날짜의 일간 뷰로 전환 */}
-        <Calendar 
-          todos={todos}
-          selectedDate={selectedDate}
-          onDateSelect={(date) => {
-            setSelectedDate(date);
-            setFilterType('daily');
-          }}
-        />
+        <div className="calendar-section">
+          <Calendar 
+            todos={todos} 
+            selectedDate={selectedDate} 
+            onDateSelect={setSelectedDate} 
+          />
+        </div>
       </aside>
 
-      {/* --- 우측 메인 컨텐츠: 헤더 & 투두 리스트 --- */}
+      {/* 우측 메인 콘텐츠 영역 */}
       <main className="main-content">
-        <header>
-          <div>
-            <h2>{selectedDate} 일정</h2>
-            {/* 로그인 유저 이름 표시 */}
-            <p style={{ color: '#718096', fontSize: '0.9rem', marginTop: '4px' }}>
-              안녕하세요, <strong>{user?.name}</strong>님! 
-              ({filterType === 'daily' ? '일간 보기' : '주간 보기'})
-            </p>
+        <header className="main-header">
+          <div className="user-info">
+            <h2>{selectedDate} 일정 관리</h2>
+            <p>안녕하세요, <strong>{user?.name || '사용자'}</strong>님! 오늘도 화이팅하세요.</p>
           </div>
-
-          {/* 로그아웃 버튼 */}
-          <button 
-            onClick={logout} 
-            className="btn-primary" 
-            style={{ backgroundColor: '#e53e3e', fontSize: '0.85rem' }}
-          >
-            로그아웃
-          </button>
+          <button onClick={logout} className="btn-logout">로그아웃</button>
         </header>
 
-        <TodoList 
-          todos={getFilteredTodos()}       // 필터링된 목록 전달
-          categories={categories}          // 카테고리 목록 전달
-          selectedDate={selectedDate}      // 현재 선택된 날짜
-          
-          // 핸들러 전달
-          onAdd={handleAddTodo}
-          onToggle={handleToggleTodo}
-          onDelete={handleDeleteTodo}
-          onUpdate={handleUpdateTodo}
-          onGoToday={handleGoToToday}
-          
-          // 뷰 상태 제어 전달
-          filterType={filterType}
-          setFilterType={setFilterType}
-        />
+        <section className="todo-card">
+          <TodoList 
+            todos={filteredTodos}
+            categories={categories}
+            onAdd={handleAddTodo}
+            onToggle={handleToggleTodo}
+            onDelete={handleDeleteTodo}
+            onUpdate={handleUpdateText}
+            onGoToday={handleGoToday}
+            filterType={filterType}
+            setFilterType={setFilterType}
+            selectedDate={selectedDate}
+          />
+        </section>
       </main>
     </div>
   );
