@@ -1,0 +1,139 @@
+@import 'variables';
+
+.todo-wrapper {
+  background: $white;
+  padding: 20px;
+  border-radius: $radius;
+  box-shadow: $shadow;
+
+  .filter-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid $gray-200;
+    padding-bottom: 10px;
+
+    button {
+      background: none;
+      border: 1px solid transparent;
+      padding: 6px 12px;
+      cursor: pointer;
+      color: $gray-600;
+      font-weight: 600;
+      border-radius: 20px;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: $gray-100;
+      }
+
+      &.active {
+        color: $white;
+        background-color: $primary;
+      }
+      
+      &.btn-today {
+        color: $primary;
+        border: 1px solid $primary;
+        margin-right: 10px;
+        
+        &:hover { background-color: $primary; color: $white; }
+      }
+    }
+  }
+
+  .input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+
+    .cat-select {
+      padding: 8px;
+      border: 1px solid $gray-300;
+      border-radius: $radius;
+      background-color: $white;
+    }
+
+    .todo-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid $gray-300;
+      border-radius: $radius;
+    }
+  }
+
+  .list-container {
+    list-style: none;
+    padding: 0;
+
+    .todo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid $gray-200;
+
+      .left-section {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+
+        input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+        }
+
+        .cat-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .todo-text {
+          font-size: 1rem;
+          color: $text-main;
+        }
+
+        .text-done {
+          text-decoration: line-through;
+          color: $gray-400;
+        }
+
+        .edit-input {
+          padding: 6px;
+          border: 1px solid $primary;
+          border-radius: 4px;
+          width: 100%;
+        }
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 5px;
+        margin-left: 10px;
+
+        button {
+          padding: 4px 8px;
+          border-radius: 4px;
+          border: none;
+          cursor: pointer;
+          font-size: 0.8rem;
+          color: white;
+        }
+        
+        .btn-edit { background-color: $gray-600; }
+        .btn-save { background-color: $primary; }
+        .btn-del { background-color: $danger; }
+      }
+    }
+    
+    .empty-msg {
+      padding: 20px;
+      text-align: center;
+      color: $gray-600;
+    }
+  }
+}
