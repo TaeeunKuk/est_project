@@ -1,51 +1,55 @@
-// frontend/src/components/category/CategoryManager.jsx
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import useTodos from "../../hooks/useTodos";
+import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi"; // 아이콘 사용
 import "../../assets/styles/components/_category.scss";
 
-const CategoryManager = () => {
+const CategoryManager = ({ onUpdateCategories }) => {
   const { user } = useAuth();
-  const { todos } = useTodos(new Date().toISOString().slice(0, 10));
+  // 카테고리 로직은 Todo와 별개로 동작할 수도 있지만, 여기서는 로컬 상태 예시
+  // 실제로는 API로 카테고리를 가져와야 합니다.
+  // 과제 요구사항 상 User:Category = 1:N 이므로, 여기서는 임시 state로 구현합니다.
 
   const [categories, setCategories] = useState([
     { id: 1, name: "업무" },
     { id: 2, name: "개인" },
     { id: 3, name: "긴급" },
   ]);
-  const [newName, setNewName] = useState("");
+  const [inputName, setInputName] = useState("");
+  const [editModeId, setEditModeId] = useState(null);
 
+  // 상위 컴포넌트로 카테고리 정보 전달
   useEffect(() => {
-    const cats = Array.from(
-      new Map(
-        todos
-          .filter((t) => t.categoryId)
-          .map((t) => [
-            t.categoryId,
-            { id: t.categoryId, name: t.categoryName ?? "카테고리" },
-          ])
-      ).values()
-    );
-    if (cats.length)
-      setCategories((prev) => {
-        const map = new Map(prev.map((c) => [c.id, c]));
-        cats.forEach((c) => map.set(c.id, c));
-        return Array.from(map.values());
-      });
-  }, [todos]);
+    onUpdateCategories && onUpdateCategories(categories);
+  }, [categories, onUpdateCategories]);
 
-  const addCategory = () => {
-    if (!newName.trim()) return;
-    setCategories((prev) => [
-      ...prev,
-      { id: Date.now(), name: newName.trim() },
-    ]);
-    setNewName("");
+  const handleAddOrUpdate = () => {
+    if (!inputName.trim()) return;
+
+    if (editModeId) {
+      // 수정
+      setCategories((prev) =>
+        prev.map((c) => (c.id === editModeId ? { ...c, name: inputName } : c))
+      );
+      setEditModeId(null);
+    } else {
+      // 추가
+      setCategories((prev) => [
+        ...prev,
+        { id: Date.now(), name: inputName.trim() },
+      ]);
+    }
+    setInputName("");
   };
 
   const deleteCategory = (id) => {
     if (!window.confirm("카테고리를 삭제하시겠습니까?")) return;
     setCategories((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const startEdit = (cat) => {
+    setEditModeId(cat.id);
+    setInputName(cat.name);
   };
 
   return (
@@ -54,26 +58,35 @@ const CategoryManager = () => {
 
       <div className="cat-input-group">
         <input
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          placeholder="새 카테고리 추가"
+          value={inputName}
+          onChange={(e) => setInputName(e.target.value)}
+          placeholder={editModeId ? "카테고리 수정" : "새 카테고리 추가"}
         />
-        <button className="btn-primary" onClick={addCategory}>
-          추가
+        <button className="btn-primary" onClick={handleAddOrUpdate}>
+          {editModeId ? "수정" : "추가"}
         </button>
       </div>
 
       <ul className="cat-list">
         {categories.map((cat) => (
-          <li key={cat.id} className="cat-chip">
+          <li
+            key={cat.id}
+            className="cat-chip"
+            style={editModeId === cat.id ? { border: "1px solid #3182ce" } : {}}
+          >
             <span className="color-dot" style={{ background: "#cbd5e0" }} />
             <span>{cat.name}</span>
-            <button
-              className="btn-del-cat"
-              onClick={() => deleteCategory(cat.id)}
-            >
-              ×
-            </button>
+            <div style={{ marginLeft: "auto", display: "flex", gap: "4px" }}>
+              <button className="btn-del-cat" onClick={() => startEdit(cat)}>
+                <FiEdit2 size={12} />
+              </button>
+              <button
+                className="btn-del-cat"
+                onClick={() => deleteCategory(cat.id)}
+              >
+                <FiTrash2 size={12} />
+              </button>
+            </div>
           </li>
         ))}
       </ul>
