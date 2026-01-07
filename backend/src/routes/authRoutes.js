@@ -1,17 +1,19 @@
-// src/routes/authRoutes.js
+// backend/src/routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const verifyToken = require('../middleware/authMiddleware');
+const verifyToken = require('../middleware/authMiddleware'); 
 
-// 1. 로그인
+// POST /api/auth/login
 router.post('/login', authController.login);
 
-// 2. 토큰 재발급
+// POST /api/auth/refresh
 router.post('/refresh', authController.refreshToken);
 
-// 3. 로그아웃
-// verifyToken 미들웨어를 먼저 거치도록 설정
+// POST /api/auth/logout (로그인 필요)
 router.post('/logout', verifyToken, authController.logout);
+
+// [추가] GET /api/auth/me (로그인 필요 - 새로고침 시 호출됨)
+router.get('/me', verifyToken, authController.getMe);
 
 module.exports = router;

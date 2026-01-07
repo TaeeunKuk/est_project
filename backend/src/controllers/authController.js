@@ -1,57 +1,55 @@
-// src/controllers/authController.js
+// backend/src/controllers/authController.js
 const authService = require('../services/authService');
 
-// 1. 로그인
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    // 서비스 호출
-    const tokenData = await authService.login(email, password);
-
-    res.json({
-      message: '로그인 성공',
-      ...tokenData
-    });
+    const result = await authService.login(email, password);
+    // accessToken, refreshToken, user 정보를 모두 반환
+    res.json(result);
   } catch (error) {
     console.error(error);
     const status = error.statusCode || 500;
-    res.status(status).json({ message: error.message || '서버 에러 발생' });
+    res.status(status).json({ message: error.message || '서버 에러' });
   }
 };
 
-// 2. 토큰 재발급
 exports.refreshToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-
+    const { refreshToken } = req.body; // body에서 받음
     if (!refreshToken) {
-      return res.status(401).json({ message: 'Refresh Token이 필요합니다.' });
+      return res.status(401).json({ message: 'Refresh Token 필요' });
     }
-
-    // 서비스 호출
     const newAccessToken = await authService.refresh(refreshToken);
-
     res.json({ accessToken: newAccessToken });
   } catch (error) {
     console.error(error);
-    // JWT Verify 에러이거나 비즈니스 로직 에러일 경우 403 처리
-    res.status(403).json({ message: 'Refresh Token 검증 실패' });
+    res.status(403).json({ message: '토큰 검증 실패' });
   }
 };
 
-// 3. 로그아웃
 exports.logout = async (req, res) => {
   try {
-    // 미들웨어(verifyToken)를 통과했다면 req.user에 정보가 있음
     const userId = req.user.id;
-
-    // 서비스 호출
     await authService.logout(userId);
-
-    res.json({ message: '로그아웃 되었습니다.' });
+    res.json({ message: '로그아웃 성공' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: '로그아웃 처리 중 에러 발생' });
+    res.status(500).json({ message: '에러 발생' });
+  }
+};
+
+// [추가] 내 정보 조회
+exports.getMe = async (req, res) => {
+  try {
+    // verifyToken 미들웨어가 req.user에 { id, email }을 넣어줌
+    const userId = req.user.id; 
+    const user = await authService.findUserById(userId);
+    if (!user) return res.status(404).json({ message: '유저 없음' });
+    
+    res.json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: '서버 에러' });
   }
 };

@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
-import '../../assets/styles/components/_calendar.scss';
+// frontend/src/components/schedule/Calendar.jsx
+import React, { useMemo } from "react";
+import "../../assets/styles/components/_calendar.scss";
 
 const getMonthMatrix = (year, month) => {
   const first = new Date(year, month, 1);
-  const startDay = first.getDay(); 
+  const startDay = first.getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const matrix = [];
   let dayCounter = 1;
@@ -43,42 +44,76 @@ const Calendar = ({ selectedDate, onSelectDate, todos = [] }) => {
 
   return (
     <div className="calendar-wrapper">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <strong style={{ fontSize: '1.2rem' }}>{year}-{String(month + 1).padStart(2, '0')}</strong>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "16px",
+        }}
+      >
+        <strong style={{ fontSize: "1.2rem" }}>
+          {year}-{String(month + 1).padStart(2, "0")}
+        </strong>
         <div>
-          <button style={{ marginRight: '8px', border:'none', background:'none', cursor:'pointer' }} onClick={() => {
-            const prev = new Date(year, month - 1, 1);
-            onSelectDate && onSelectDate(prev.toISOString().slice(0,10));
-          }}>◀</button>
-          <button style={{ border:'none', background:'none', cursor:'pointer' }} onClick={() => {
-            const next = new Date(year, month + 1, 1);
-            onSelectDate && onSelectDate(next.toISOString().slice(0,10));
-          }}>▶</button>
+          <button
+            style={{
+              marginRight: "8px",
+              border: "none",
+              background: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              const prev = new Date(year, month - 1, 1);
+              onSelectDate && onSelectDate(prev.toISOString().slice(0, 10));
+            }}
+          >
+            ◀
+          </button>
+          <button
+            style={{ border: "none", background: "none", cursor: "pointer" }}
+            onClick={() => {
+              const next = new Date(year, month + 1, 1);
+              onSelectDate && onSelectDate(next.toISOString().slice(0, 10));
+            }}
+          >
+            ▶
+          </button>
         </div>
       </div>
 
       <div className="week-header">
-        <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+        <div>일</div>
+        <div>월</div>
+        <div>화</div>
+        <div>수</div>
+        <div>목</div>
+        <div>금</div>
+        <div>토</div>
       </div>
 
       <div className="days-grid">
         {matrix.map((week, wi) =>
-          (Array.isArray(week) ? week : new Array(7).fill(null)).map((d, di) => {
-            const cellDate = d ? new Date(year, month, d).toISOString().slice(0,10) : null;
-            const isSelected = cellDate === selectedDate;
-            const hasTodo = cellDate ? todoDateSet.has(cellDate) : false;
+          (Array.isArray(week) ? week : new Array(7).fill(null)).map(
+            (d, di) => {
+              const cellDate = d
+                ? new Date(year, month, d).toISOString().slice(0, 10)
+                : null;
+              const isSelected = cellDate === selectedDate;
+              const hasTodo = cellDate ? todoDateSet.has(cellDate) : false;
 
-            return (
-              <div
-                key={`${wi}-${di}`}
-                className={`day-cell ${isSelected ? 'selected' : ''}`}
-                onClick={() => d && onSelectDate && onSelectDate(cellDate)}
-              >
-                <div>{d || ''}</div>
-                {hasTodo && <div className="todo-marker" />}
-              </div>
-            );
-          })
+              return (
+                <div
+                  key={`${wi}-${di}`}
+                  className={`day-cell ${isSelected ? "selected" : ""}`}
+                  onClick={() => d && onSelectDate && onSelectDate(cellDate)}
+                >
+                  <div>{d || ""}</div>
+                  {hasTodo && <div className="todo-marker" />}
+                </div>
+              );
+            }
+          )
         )}
       </div>
     </div>

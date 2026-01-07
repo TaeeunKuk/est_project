@@ -46,7 +46,9 @@ exports.login = async (email, password) => {
     EX: 7 * 24 * 60 * 60 
   });
 
-  return { accessToken, refreshToken };
+  // [수정] 프론트엔드 상태 업데이트를 위해 user 정보도 반환 (비밀번호 제외)
+  const userInfo = { id: user.id, email: user.email, name: user.name }; // name 등 필요한 필드 추가
+  return { accessToken, refreshToken, user: userInfo };
 };
 
 /**
@@ -81,6 +83,16 @@ exports.refresh = async (refreshToken) => {
  * 로그아웃 서비스
  */
 exports.logout = async (userId) => {
-  // Redis에서 해당 유저의 Refresh Token 삭제
   await redisClient.del(userId.toString());
+};
+
+/**
+ * [추가] ID로 유저 조회 (내 정보 가져오기용)
+ */
+exports.findUserById = async (userId) => {
+  const result = await pool.query('SELECT id, email, name FROM users WHERE id = $1', [userId]);
+  if (result.rows.length === 0) {
+    return null;
+  }
+  return result.rows[0];
 };
