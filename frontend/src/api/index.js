@@ -1,21 +1,29 @@
+
+// frontend/src/api/index.js
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: '/api', 
+  // baseURL: '/api', // Proxy 사용 시
+  baseURL: 'http://localhost:8080/api',
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true, // [필수] HttpOnly 쿠키 전송
 });
 
+// 응답 인터셉터 (토큰 만료 시 자동 갱신 로직)
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // 419: 토큰 만료, 401: 인증 실패
     if ((error.response?.status === 419 || error.response?.status === 401) && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
+        // 토큰 갱신 요청
         await apiClient.post('/users/refresh'); 
+        // 갱신 성공 시 원래 요청 다시 시도
         return apiClient(originalRequest);
       } catch (refreshError) {
+        // 갱신 실패 시 로그인 페이지로 이동
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }
@@ -23,16 +31,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// 인증 관련
-export const signUp = (data) => apiClient.post('/users/signup', data);
-export const login = (data) => apiClient.post('/users/login', data);
-export const logout = () => apiClient.post('/users/logout');
-
-// 투두 관련
-export const getTodos = () => apiClient.get('/todos');
-export const createTodo = (data) => apiClient.post('/todos', data);
-export const updateTodo = (id, data) => apiClient.put(`/todos/${id}`, data);
-export const deleteTodo = (id) => apiClient.delete(`/todos/${id}`);
 
 export default apiClient;

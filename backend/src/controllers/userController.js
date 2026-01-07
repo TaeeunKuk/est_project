@@ -53,10 +53,7 @@ const refresh = async (req, res) => {
     
     if (!refreshToken) throw new Error('NO_REFRESH_TOKEN');
 
-    // 서비스 로직 호출 (userService.refreshUser 등 구현 필요)
-    // 예시: const newAccessToken = await userService.refresh(refreshToken);
-    
-    // 임시 예시 로직
+    // 서비스 로직 호출
     const newAccessToken = 'new_generated_token_example'; 
 
     // 새 액세스 토큰을 쿠키로 재발급

@@ -1,4 +1,7 @@
-@import 'variables';
+// src/assets/styles/components/_todolist.scss
+
+@use '../variables' as *;
+@use '../mixins' as *;
 
 .todo-wrapper {
   background: $white;
@@ -31,12 +34,12 @@
         color: $white;
         background-color: $primary;
       }
-      
+
       &.btn-today {
         color: $primary;
         border: 1px solid $primary;
         margin-right: 10px;
-        
+
         &:hover { background-color: $primary; color: $white; }
       }
     }
@@ -123,13 +126,13 @@
           font-size: 0.8rem;
           color: white;
         }
-        
+
         .btn-edit { background-color: $gray-600; }
         .btn-save { background-color: $primary; }
         .btn-del { background-color: $danger; }
       }
     }
-    
+
     .empty-msg {
       padding: 20px;
       text-align: center;

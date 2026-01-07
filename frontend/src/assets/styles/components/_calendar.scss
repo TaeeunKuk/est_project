@@ -1,4 +1,7 @@
-@import 'variables';
+// src/assets/styles/components/_calendar.scss
+
+@use '../variables' as *;
+@use '../mixins' as *;
 
 .calendar-wrapper {
   background: $white;
@@ -32,7 +35,7 @@
       transition: 0.2s;
 
       &:hover { background-color: $gray-100; }
-      
+
       &.selected {
         border: 2px solid $primary;
         background-color: rgba($primary, 0.1);

@@ -1,4 +1,7 @@
-@import 'variables';
+// src/assets/styles/components/_auth.scss
+
+@use '../variables' as *;
+@use '../mixins' as *;
 
 .auth-container {
   display: flex;
@@ -54,7 +57,7 @@
         &:hover {
           background-color: $primary-hover;
         }
-        
+
         &:disabled {
           background-color: $gray-400;
           cursor: not-allowed;

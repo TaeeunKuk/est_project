@@ -1,4 +1,7 @@
-@import 'variables';
+// src/assets/styles/components/_category.scss
+
+@use '../variables' as *;
+@use '../mixins' as *;
 
 .category-manager {
   background: $white;

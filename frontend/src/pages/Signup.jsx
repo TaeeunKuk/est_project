@@ -1,6 +1,7 @@
+// frontend/src/pages/Signup.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { signUp } from '../api';
+import { useAuth } from '../context/AuthContext'; // Context 사용
 import '../assets/styles/main.scss';
 
 const Signup = () => {
@@ -11,6 +12,8 @@ const Signup = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  
+  const { signup } = useAuth(); // Context에서 signup 가져오기
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,16 +29,18 @@ const Signup = () => {
       return;
     }
 
-    try {
-      await signUp({
-        email: formData.email,
-        password: formData.password,
-        name: formData.name
-      });
-      alert('회원가입이 완료되었습니다. 로그인해주세요.');
-      navigate('/login');
-    } catch (err) {
-      setError(err.response?.data?.message || '회원가입 실패: 다시 시도해주세요.');
+    // Context의 signup 함수 호출 (자동 로그인 처리됨)
+    const result = await signup({
+      email: formData.email,
+      password: formData.password,
+      name: formData.name
+    });
+
+    if (result.success) {
+      alert('회원가입을 환영합니다!'); 
+      navigate('/dashboard'); // [핵심] 로그인 페이지가 아닌 대시보드로 바로 이동
+    } else {
+      setError(result.message);
     }
   };
 

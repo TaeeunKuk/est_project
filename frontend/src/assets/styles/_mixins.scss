@@ -1,5 +1,25 @@
-@mixin flex-center {
+// src/assets/styles/_mixins.scss
+
+@use 'variables' as vars;
+
+// 1. Flexbox 정렬 자동화
+@mixin flex-box($justify: center, $align: center, $direction: row) {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: $justify;
+  align-items: $align;
+  flex-direction: $direction;
+}
+
+// 2. 반응형 미디어 쿼리 (Mobile)
+@mixin mobile {
+  @media (max-width: #{vars.$breakpoint-mobile}) {
+    @content;
+  }
+}
+
+// 3. 반응형 미디어 쿼리 (Tablet)
+@mixin tablet {
+  @media (max-width: #{vars.$breakpoint-tablet}) {
+    @content;
+  }
 }
