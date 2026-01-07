@@ -1,4 +1,4 @@
-
+// fr
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authService } from '../services/authService'; // 서비스 연결
 import apiClient from '../api';
@@ -16,8 +16,9 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       try {
         // 내 정보 가져오기 API 호출 (쿠키 인증)
-        const response = await apiClient.get('/users/me'); 
-        setUser(response.data.user || response.data);
+        const response = await apiClient.get('/users/me');
+        // 백엔드 응답 형태에 따라 user 필드가 있거나 전체가 user일 수 있음
+        setUser(response.data?.user ?? response.data ?? null);
       } catch (error) {
         setUser(null);
       } finally {
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login({ email, password });
-      setUser(response.data.user || response.data);
+      setUser(response.data?.user ?? response.data ?? null);
       return { success: true };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || '로그인 실패' };
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userInfo) => {
     try {
       const response = await authService.signUp(userInfo);
-      setUser(response.data.user || response.data);
+      setUser(response.data?.user ?? response.data ?? null);
       return { success: true };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || '가입 실패' };
@@ -55,6 +56,7 @@ export const AuthProvider = ({ children }) => {
       await authService.logout();
     } finally {
       setUser(null);
+      // 로그아웃 후 로그인 페이지로 이동
       window.location.href = '/login';
     }
   };
