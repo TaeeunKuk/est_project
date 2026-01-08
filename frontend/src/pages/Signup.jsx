@@ -1,3 +1,4 @@
+// frontend/src/pages/Signup.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -28,7 +29,6 @@ const Signup = () => {
       return;
     }
 
-    // Context의 signup 호출 (내부에서 토큰 저장 및 user state 업데이트 완료됨)
     const result = await signup({
       email: formData.email,
       password: formData.password,
@@ -36,9 +36,6 @@ const Signup = () => {
     });
 
     if (result.success) {
-      // alert('회원가입을 환영합니다!'); // 필요 시 주석 해제
-
-      // 상태 업데이트 후 이동하므로 ProtectedRoute를 통과하여 대시보드로 이동됨
       navigate("/dashboard");
     } else {
       setError(result.message);
@@ -48,6 +45,11 @@ const Signup = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        {/* 브랜딩 헤더 추가 */}
+        <div className="brand">
+          <h1>My Scheduler</h1>
+        </div>
+
         <h2>회원가입</h2>
         {error && <p className="error-msg">{error}</p>}
 

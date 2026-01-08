@@ -1,7 +1,4 @@
-import React, { useState, forwardRef } from "react";
-import DatePicker from "react-datepicker";
-import { ko } from "date-fns/locale";
-import { format } from "date-fns";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FiCheckSquare,
   FiSquare,
@@ -11,10 +8,10 @@ import {
   FiPlus,
   FiSettings,
   FiX,
-  FiCalendar,
+  FiTag,
+  FiChevronDown,
 } from "react-icons/fi";
-import "react-datepicker/dist/react-datepicker.css";
-import "../../assets/styles/components/_todolist.scss"; // scss import
+import "../../assets/styles/components/_todolist.scss";
 
 const TodoList = ({
   todos = [],
@@ -29,23 +26,35 @@ const TodoList = ({
   // --- 상태 관리 ---
   const [newTodoTitle, setNewTodoTitle] = useState("");
 
-  // 1. 새로운 할 일의 속성 (카테고리, 날짜)
+  // 새로운 할 일의 카테고리 (날짜 로직 삭제됨)
   const [newTodoCatId, setNewTodoCatId] = useState(null);
-  const [newDateRange, setNewDateRange] = useState([null, null]);
-  const [startDate, endDate] = newDateRange;
 
-  // 2. 리스트 필터링용 카테고리 상태 (UI 상단)
+  // 드롭다운 열림 상태
+  const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // 리스트 필터링용 상태
   const [filterCatId, setFilterCatId] = useState("");
 
   // 수정 모드 상태
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
 
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsCatDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // --- 로직 ---
 
-  // 필터링된 투두 리스트
   const filteredTodos = (Array.isArray(todos) ? todos : []).filter((todo) => {
-    if (!filterCatId) return true; // 전체 보기
+    if (!filterCatId) return true;
     return todo.categoryId === Number(filterCatId);
   });
 
@@ -55,18 +64,12 @@ const TodoList = ({
       return;
     }
 
-    // 상위 컴포넌트로 전달 (제목, 카테고리, 시작일, 종료일)
-    onAdd(
-      newTodoTitle,
-      newTodoCatId ? Number(newTodoCatId) : null,
-      startDate || new Date(), // 없으면 오늘
-      endDate || startDate || new Date() // 없으면 시작일과 동일하게
-    );
+    // 기간 관련 인자 제거됨
+    onAdd(newTodoTitle, newTodoCatId ? Number(newTodoCatId) : null);
 
-    // 입력값 초기화
     setNewTodoTitle("");
     setNewTodoCatId(null);
-    setNewDateRange([null, null]);
+    setIsCatDropdownOpen(false);
   };
 
   const startEditing = (todo) => {
@@ -84,17 +87,12 @@ const TodoList = ({
     setEditTitle("");
   };
 
-  // DatePicker 커스텀 인풋
-  const CustomDateInput = forwardRef(({ value, onClick }, ref) => (
-    <button className="date-badge-btn" onClick={onClick} ref={ref}>
-      <FiCalendar className="icon" />
-      <span>{value || "기간 설정 (선택)"}</span>
-    </button>
-  ));
+  // 현재 선택된 카테고리 객체
+  const selectedCategory = categories.find((c) => c.id === newTodoCatId);
 
   return (
     <div className="todo-list-container">
-      {/* 1. 상단 필터 & 설정 영역 (기존 위치 유지) */}
+      {/* 1. 상단 필터 & 설정 영역 */}
       <div className="top-control-bar">
         <select
           className="filter-select"
@@ -117,7 +115,7 @@ const TodoList = ({
         </button>
       </div>
 
-      {/* 2. 입력 및 속성 설정 영역 (카드 형태) */}
+      {/* 2. 입력 및 속성 설정 영역 */}
       <div className="creation-card">
         {/* (1) 텍스트 입력 */}
         <div className="input-row">
@@ -134,47 +132,80 @@ const TodoList = ({
           </button>
         </div>
 
-        {/* (2) 하단 속성 선택 (모달 느낌의 옵션 바) */}
+        {/* (2) 하단 속성 선택 (드롭다운만 남음) */}
         <div className="options-row">
           <div className="option-group">
             <span className="label">분류:</span>
-            <div className="category-chips">
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  className={`chip ${newTodoCatId === c.id ? "active" : ""}`}
-                  onClick={() =>
-                    setNewTodoCatId(newTodoCatId === c.id ? null : c.id)
-                  }
-                  style={{
-                    borderColor:
-                      newTodoCatId === c.id ? c.color : "transparent",
-                    backgroundColor:
-                      newTodoCatId === c.id ? `${c.color}20` : "#f7fafc",
-                    color: newTodoCatId === c.id ? c.color : "#718096",
-                  }}
-                >
-                  {c.name}
-                </button>
-              ))}
+
+            {/* 커스텀 드롭다운 */}
+            <div className="custom-dropdown-container" ref={dropdownRef}>
+              <button
+                className={`dropdown-trigger ${
+                  selectedCategory ? "has-value" : ""
+                }`}
+                onClick={() => setIsCatDropdownOpen(!isCatDropdownOpen)}
+                style={
+                  selectedCategory
+                    ? {
+                        backgroundColor: `${selectedCategory.color}15`,
+                        color: selectedCategory.color,
+                        borderColor: selectedCategory.color,
+                      }
+                    : {}
+                }
+              >
+                <div className="trigger-content">
+                  {selectedCategory ? (
+                    <>
+                      <span
+                        className="dot"
+                        style={{ background: selectedCategory.color }}
+                      />
+                      <span className="text">{selectedCategory.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiTag className="icon" />
+                      <span className="text">분류 없음</span>
+                    </>
+                  )}
+                </div>
+                <FiChevronDown className="arrow" />
+              </button>
+
+              {isCatDropdownOpen && (
+                <ul className="dropdown-menu">
+                  <li
+                    className="dropdown-item"
+                    onClick={() => {
+                      setNewTodoCatId(null);
+                      setIsCatDropdownOpen(false);
+                    }}
+                  >
+                    <span className="text-gray">분류 없음</span>
+                  </li>
+                  {categories.map((c) => (
+                    <li
+                      key={c.id}
+                      className="dropdown-item"
+                      onClick={() => {
+                        setNewTodoCatId(c.id);
+                        setIsCatDropdownOpen(false);
+                      }}
+                    >
+                      <span
+                        className="color-circle"
+                        style={{ background: c.color }}
+                      />
+                      <span>{c.name}</span>
+                      {newTodoCatId === c.id && (
+                        <FiCheckSquare className="check" color={c.color} />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          </div>
-
-          <div className="divider"></div>
-
-          <div className="option-group">
-            <span className="label">기간:</span>
-            <DatePicker
-              selectsRange={true}
-              startDate={startDate}
-              endDate={endDate}
-              onChange={(update) => setNewDateRange(update)}
-              customInput={<CustomDateInput />}
-              dateFormat="MM.dd"
-              locale={ko}
-              shouldCloseOnSelect={false}
-              placeholderText="기간 설정"
-            />
           </div>
         </div>
       </div>
@@ -213,9 +244,9 @@ const TodoList = ({
                   </div>
 
                   <div className="content">
-                    {/* 정보 라인 (카테고리 + 기간) */}
-                    <div className="meta-info">
-                      {matchedCat && (
+                    {/* 카테고리 정보만 표시 (기간 삭제됨) */}
+                    {matchedCat && (
+                      <div className="meta-info">
                         <span
                           className="cat-badge"
                           style={{
@@ -225,16 +256,8 @@ const TodoList = ({
                         >
                           {matchedCat.name}
                         </span>
-                      )}
-                      {todo.startDate && (
-                        <span className="date-text">
-                          {format(new Date(todo.startDate), "MM.dd")}
-                          {todo.endDate && todo.endDate !== todo.startDate
-                            ? ` ~ ${format(new Date(todo.endDate), "MM.dd")}`
-                            : ""}
-                        </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                     {editingId === todo.id ? (
                       <input

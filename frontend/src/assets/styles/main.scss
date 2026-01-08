@@ -14,6 +14,7 @@ body {
   font-family: "Noto Sans KR", sans-serif;
   color: #2d3748;
   -webkit-font-smoothing: antialiased;
+  overflow: hidden; /* 전체 화면 스크롤 방지 */
 }
 
 button {
@@ -24,14 +25,14 @@ button {
    2. Dashboard Layout
    ========================================= */
 .dashboard-container {
-  max-width: 1400px;
+  max-width: 1600px; /* 와이드 화면 대응 */
   margin: 0 auto;
   height: 100vh;
   display: flex;
   flex-direction: column;
 
   .dashboard-header {
-    flex: 0 0 64px;
+    flex: 0 0 60px; /* 헤더 높이 고정 */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -67,12 +68,13 @@ button {
   }
 
   .dashboard-content {
-    flex: 1;
+    flex: 1; /* 남은 높이 모두 차지 */
     display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 24px;
-    padding: 24px;
-    overflow: hidden;
+    grid-template-columns: 360px 1fr; /* 왼쪽 너비 고정 */
+    gap: 20px;
+    padding: 20px;
+    overflow: hidden; /* 내부 스크롤 제어 */
+    height: calc(100vh - 60px); /* 헤더 제외 높이 명시 */
   }
 }
 
@@ -87,22 +89,18 @@ button {
 }
 
 /* =========================================
-   3. Left Column (Calendar & Widget)
+   3. Left Column (Calendar & Widget) - Fixed Height
    ========================================= */
 .left-column {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  overflow-y: auto;
-  padding-right: 4px;
-
-  &::-webkit-scrollbar {
-    width: 0px;
-  }
+  gap: 16px;
+  height: 100%; /* 부모 높이 상속 */
+  overflow: hidden; /* 스크롤 방지 */
 
   .calendar-card {
-    padding: 24px;
-    flex-shrink: 0;
+    padding: 20px; /* 패딩 축소 */
+    flex-shrink: 0; /* 크기 줄어듦 방지 */
 
     .react-calendar {
       width: 100%;
@@ -111,26 +109,27 @@ button {
       background: none;
 
       .react-calendar__navigation {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
+        height: 36px;
         button {
-          font-size: 1.1rem;
+          font-size: 1rem;
           font-weight: bold;
-          min-width: 44px;
+          min-width: 40px;
           background: none;
-          &:enabled:hover,
-          &:enabled:focus {
+          border-radius: 8px;
+          &:enabled:hover {
             background-color: #f7fafc;
-            border-radius: 8px;
           }
         }
       }
 
       .react-calendar__month-view__weekdays {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #a0aec0;
         text-transform: uppercase;
         font-weight: 600;
         text-decoration: none;
+        margin-bottom: 4px;
         abbr {
           text-decoration: none;
           cursor: default;
@@ -138,18 +137,18 @@ button {
       }
 
       .react-calendar__tile {
-        height: 80px;
+        /* [중요] 타일 높이 대폭 축소하여 전체 높이 제어 */
+        height: 44px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
-        padding-top: 8px;
-        font-size: 0.95rem;
-        border-radius: 12px;
+        padding-top: 6px;
+        font-size: 0.9rem;
+        border-radius: 8px;
         transition: 0.2s;
 
-        &:enabled:hover,
-        &:enabled:focus {
+        &:enabled:hover {
           background: #ebf8ff;
           color: #3182ce;
         }
@@ -171,9 +170,9 @@ button {
 
       .dot {
         margin-top: auto;
-        margin-bottom: 6px;
-        width: 6px;
-        height: 6px;
+        margin-bottom: 4px;
+        width: 5px;
+        height: 5px;
         background-color: #e53e3e;
         border-radius: 50%;
       }
@@ -181,22 +180,22 @@ button {
   }
 
   .status-card {
-    padding: 24px;
+    padding: 20px;
     flex-shrink: 0;
 
     .status-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       h3 {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: bold;
       }
       .date-badge {
         background: #edf2f7;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
         color: #4a5568;
       }
     }
@@ -204,19 +203,19 @@ button {
     .status-body {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
 
       .progress-circle {
-        width: 100px;
-        height: 100px;
+        width: 80px; /* 크기 약간 축소 */
+        height: 80px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
 
         .inner-circle {
-          width: 84px;
-          height: 84px;
+          width: 66px;
+          height: 66px;
           background: white;
           border-radius: 50%;
           display: flex;
@@ -224,7 +223,7 @@ button {
           justify-content: center;
 
           .percent {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 800;
             color: #3182ce;
           }
@@ -235,12 +234,12 @@ button {
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
 
         .info-item {
           display: flex;
           justify-content: space-between;
-          font-size: 0.95rem;
+          font-size: 0.9rem;
 
           .value {
             font-weight: bold;
@@ -258,27 +257,30 @@ button {
 }
 
 /* =========================================
-   4. Right Column (Todo List & Header)
+   4. Right Column (Todo List & Header) - Scrolling Fix
    ========================================= */
 .right-column {
   display: flex;
   flex-direction: column;
+  height: 100%; /* 부모 높이 꽉 채움 */
+  overflow: hidden; /* 이중 스크롤 방지 */
 
   .todo-card {
-    flex: 1;
-    padding: 32px;
+    flex: 1; /* 높이 100% 차지 */
+    padding: 24px 32px;
     display: flex;
     flex-direction: column;
+    height: 100%; /* 필수 */
+    overflow: hidden; /* 필수 */
 
     .todo-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
       border-bottom: 2px solid #f7fafc;
-      flex-wrap: wrap;
-      gap: 10px;
+      flex-shrink: 0; /* 스크롤 시 헤더 고정 */
 
       .header-title h2 {
         font-size: 1.6rem;
@@ -302,19 +304,16 @@ button {
         gap: 4px;
 
         .filter-btn {
-          height: 36px;
+          height: 34px;
           border: none;
           background: transparent;
-          padding: 0 16px;
+          padding: 0 14px;
           border-radius: 8px;
           color: #718096;
           font-weight: 600;
           font-size: 0.9rem;
           cursor: pointer;
           white-space: nowrap;
-          display: flex;
-          align-items: center;
-          justify-content: center;
           transition: all 0.2s;
 
           &:hover {
@@ -327,46 +326,35 @@ button {
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
           }
         }
-
-        .date-picker-wrapper {
-          display: flex;
-          align-items: center;
-          .custom-picker-btn {
-            gap: 6px;
-            width: 230px;
-            justify-content: center;
-            .icon {
-              font-size: 1rem;
-              margin-bottom: 2px;
-            }
-          }
-        }
       }
     }
 
     .todo-body {
-      flex: 1;
+      flex: 1; /* 남은 공간 모두 차지 */
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow: hidden; /* 내부 TodoList에서 스크롤 처리 */
+      min-height: 0; /* Flexbox 자식 스크롤 버그 해결용 */
     }
   }
 }
 
 /* =========================================
-   5. Todo List Component (New 3-Tier Layout)
+   5. Todo List Component (Internal Structure)
    ========================================= */
 .todo-list-container {
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden; /* 컨테이너 밖으로 나가는 것 방지 */
 
   /* 1. 상단 필터 & 설정 바 */
   .top-control-bar {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    flex-shrink: 0; /* 스크롤 방지 */
 
     .filter-select {
       height: 38px;
@@ -378,7 +366,7 @@ button {
       font-size: 0.9rem;
       cursor: pointer;
       outline: none;
-      flex: 1; /* 남은 공간 차지 */
+      flex: 1;
       max-width: 200px;
       &:focus {
         border-color: #3182ce;
@@ -404,16 +392,17 @@ button {
     }
   }
 
-  /* 2. 생성 카드 (입력 + 옵션) */
+  /* 2. 생성 카드 (입력 + 분류) */
   .creation-card {
     background: #f9fafb;
     border: 1px solid #edf2f7;
     border-radius: 12px;
     padding: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex-shrink: 0; /* 스크롤 방지 */
 
     /* 텍스트 입력 줄 */
     .input-row {
@@ -421,7 +410,7 @@ button {
       gap: 10px;
       .main-input {
         flex: 1;
-        height: 46px;
+        height: 44px;
         padding: 0 16px;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
@@ -434,8 +423,8 @@ button {
         }
       }
       .btn-add {
-        width: 46px;
-        height: 46px;
+        width: 44px;
+        height: 44px;
         background: #3182ce;
         color: white;
         border: none;
@@ -452,23 +441,18 @@ button {
       }
     }
 
-    /* 하단 옵션 줄 (모달 느낌) */
+    /* 하단 옵션 줄 (드롭다운만 남음) */
     .options-row {
       display: flex;
       align-items: center;
       gap: 16px;
       padding-top: 4px;
 
-      .divider {
-        width: 1px;
-        height: 24px;
-        background: #e2e8f0;
-      }
-
       .option-group {
         display: flex;
         align-items: center;
         gap: 10px;
+        position: relative;
 
         .label {
           font-size: 0.85rem;
@@ -476,65 +460,127 @@ button {
           color: #718096;
         }
 
-        /* 카테고리 칩 스타일 */
-        .category-chips {
-          display: flex;
-          gap: 6px;
-          flex-wrap: wrap;
+        /* --- 커스텀 드롭다운 스타일 --- */
+        .custom-dropdown-container {
+          position: relative;
 
-          .chip {
+          /* 트리거 버튼 */
+          .dropdown-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
             padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #fff;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             color: #718096;
-            border-color: #e2e8f0;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 160px; /* 고정 너비 */
+
+            .trigger-content {
+              display: flex;
+              align-items: center;
+              gap: 10px; /* 간격 확보 */
+              overflow: hidden;
+
+              .icon {
+                font-size: 0.9rem;
+                flex-shrink: 0;
+              }
+
+              /* 색상 점 */
+              .dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+              .text {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+            }
+
+            .arrow {
+              font-size: 1rem;
+              color: #a0aec0;
+              flex-shrink: 0;
+            }
 
             &:hover {
-              background: #edf2f7;
+              border-color: #cbd5e0;
+              background: #fff;
             }
-            &.active {
-              /* 인라인 스타일로 색상이 덮어씌워짐 */
-              font-weight: 700;
-              box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            }
-          }
-        }
 
-        /* 날짜 선택 버튼 스타일 */
-        .date-badge-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 10px;
-          background: white;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          color: #4a5568;
-          font-size: 0.85rem;
-          font-weight: 500;
-          cursor: pointer;
-          &:hover {
-            border-color: #3182ce;
-            color: #3182ce;
+            &.has-value {
+              font-weight: 700;
+              border-width: 1px;
+            }
           }
-          .icon {
-            font-size: 0.9rem;
+
+          /* 드롭다운 메뉴 */
+          .dropdown-menu {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            width: 100%;
+            min-width: 160px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 100; /* z-index 높임 */
+            list-style: none;
+            padding: 4px 0;
+            max-height: 200px;
+            overflow-y: auto;
+
+            .dropdown-item {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 8px 12px;
+              font-size: 0.9rem;
+              cursor: pointer;
+              color: #4a5568;
+
+              &:hover {
+                background: #f7fafc;
+              }
+
+              .color-circle {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+              .text-gray {
+                color: #a0aec0;
+              }
+              .check {
+                margin-left: auto;
+                font-size: 1rem;
+              }
+            }
           }
         }
       }
     }
   }
 
-  /* 리스트 영역 */
+  /* 리스트 영역 (스크롤 적용 핵심) */
   .list-scroll-area {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; /* 남은 높이 모두 차지 */
+    overflow-y: auto; /* 세로 스크롤 허용 */
     padding-right: 6px;
+    padding-bottom: 10px;
+
+    /* 스크롤바 스타일링 */
     &::-webkit-scrollbar {
       width: 6px;
     }
@@ -604,10 +650,6 @@ button {
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: 700;
-          }
-          .date-text {
-            font-size: 0.75rem;
-            color: #a0aec0;
           }
         }
 
@@ -819,76 +861,4 @@ button {
       }
     }
   }
-}
-
-/* =========================================
-   7. React DatePicker Custom Styles
-   ========================================= */
-.react-datepicker {
-  font-family: "Noto Sans KR", sans-serif !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 12px !important;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
-  background-color: white !important;
-  overflow: hidden;
-  font-size: 0.9rem !important;
-}
-
-.react-datepicker__header {
-  background-color: white !important;
-  border-bottom: 1px solid #f7fafc !important;
-  padding-top: 10px !important;
-}
-
-.react-datepicker__current-month {
-  font-size: 0.95rem !important;
-  font-weight: 700 !important;
-  color: #2d3748 !important;
-  margin-bottom: 8px !important;
-}
-
-.react-datepicker__day-name {
-  color: #a0aec0 !important;
-  font-weight: 600 !important;
-  width: 32px !important;
-  line-height: 32px !important;
-  margin: 2px !important;
-}
-
-.react-datepicker__day {
-  width: 32px !important;
-  line-height: 32px !important;
-  margin: 2px !important;
-  border-radius: 50% !important;
-  color: #4a5568 !important;
-
-  &:hover {
-    background-color: #ebf8ff !important;
-    color: #3182ce !important;
-  }
-}
-
-.react-datepicker__day--selected,
-.react-datepicker__day--range-start,
-.react-datepicker__day--range-end {
-  background-color: #3182ce !important;
-  color: white !important;
-  font-weight: bold;
-}
-
-.react-datepicker__day--in-range:not(.react-datepicker__day--range-start):not(
-    .react-datepicker__day--range-end
-  ) {
-  background-color: #ebf8ff !important;
-  color: #3182ce !important;
-  border-radius: 0 !important;
-}
-
-.react-datepicker__triangle {
-  display: none !important;
-}
-
-.react-datepicker__navigation {
-  top: 8px !important;
 }
