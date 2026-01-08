@@ -1,27 +1,24 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
-import useTodos from "../../hooks/useTodos";
-import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi"; // 아이콘 사용
-import "../../assets/styles/components/_category.scss";
+// frontend/src/components/category/CategoryManager.jsx
+import React, { useState } from "react";
+import { FiEdit2, FiTrash2, FiPlus, FiCheck } from "react-icons/fi";
 
-const CategoryManager = ({ onUpdateCategories }) => {
-  const { user } = useAuth();
-  // 카테고리 로직은 Todo와 별개로 동작할 수도 있지만, 여기서는 로컬 상태 예시
-  // 실제로는 API로 카테고리를 가져와야 합니다.
-  // 과제 요구사항 상 User:Category = 1:N 이므로, 여기서는 임시 state로 구현합니다.
-
-  const [categories, setCategories] = useState([
-    { id: 1, name: "업무" },
-    { id: 2, name: "개인" },
-    { id: 3, name: "긴급" },
-  ]);
+const CategoryManager = ({ categories, setCategories }) => {
   const [inputName, setInputName] = useState("");
+  const [selectedColor, setSelectedColor] = useState("#3182ce");
   const [editModeId, setEditModeId] = useState(null);
 
-  // 상위 컴포넌트로 카테고리 정보 전달
-  useEffect(() => {
-    onUpdateCategories && onUpdateCategories(categories);
-  }, [categories, onUpdateCategories]);
+  // 사용할 색상 팔레트
+  const colorPalette = [
+    "#3182ce",
+    "#38a169",
+    "#e53e3e",
+    "#d69e2e",
+    "#805ad5",
+    "#d53f8c",
+    "#718096",
+    "#319795",
+    "#dd6b20",
+  ];
 
   const handleAddOrUpdate = () => {
     if (!inputName.trim()) return;
@@ -29,62 +26,90 @@ const CategoryManager = ({ onUpdateCategories }) => {
     if (editModeId) {
       // 수정
       setCategories((prev) =>
-        prev.map((c) => (c.id === editModeId ? { ...c, name: inputName } : c))
+        prev.map((c) =>
+          c.id === editModeId
+            ? { ...c, name: inputName, color: selectedColor }
+            : c
+        )
       );
       setEditModeId(null);
     } else {
-      // 추가
+      // 생성
       setCategories((prev) => [
         ...prev,
-        { id: Date.now(), name: inputName.trim() },
+        { id: Date.now(), name: inputName.trim(), color: selectedColor },
       ]);
     }
     setInputName("");
+    setSelectedColor(colorPalette[0]);
   };
 
-  const deleteCategory = (id) => {
-    if (!window.confirm("카테고리를 삭제하시겠습니까?")) return;
-    setCategories((prev) => prev.filter((c) => c.id !== id));
+  const handleDelete = (id) => {
+    const confirmed = window.confirm("이 카테고리를 삭제하시겠습니까?");
+    if (confirmed) {
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+    }
   };
 
   const startEdit = (cat) => {
     setEditModeId(cat.id);
     setInputName(cat.name);
+    setSelectedColor(cat.color || "#3182ce");
   };
 
   return (
-    <div className="category-manager">
-      <h3>카테고리 관리</h3>
-
-      <div className="cat-input-group">
+    <div className="category-manager-modal">
+      {/* 1. 입력 및 버튼 행 */}
+      <div className="input-row">
         <input
           value={inputName}
           onChange={(e) => setInputName(e.target.value)}
-          placeholder={editModeId ? "카테고리 수정" : "새 카테고리 추가"}
+          placeholder={editModeId ? "카테고리 수정" : "새 카테고리 이름"}
+          className="cat-input"
+          onKeyPress={(e) => e.key === "Enter" && handleAddOrUpdate()}
         />
-        <button className="btn-primary" onClick={handleAddOrUpdate}>
-          {editModeId ? "수정" : "추가"}
+        <button className="btn-save" onClick={handleAddOrUpdate}>
+          {editModeId ? "수정" : <FiPlus />}
         </button>
       </div>
 
+      {/* 2. 색상 선택 행 (별도 라인 분리) */}
+      <div className="color-picker-row">
+        <span className="label">색상:</span>
+        <div className="palette">
+          {colorPalette.map((color) => (
+            <div
+              key={color}
+              className={`color-circle ${
+                selectedColor === color ? "selected" : ""
+              }`}
+              style={{ backgroundColor: color }}
+              onClick={() => setSelectedColor(color)}
+            >
+              {selectedColor === color && <FiCheck color="white" size={12} />}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. 카테고리 목록 */}
       <ul className="cat-list">
         {categories.map((cat) => (
-          <li
-            key={cat.id}
-            className="cat-chip"
-            style={editModeId === cat.id ? { border: "1px solid #3182ce" } : {}}
-          >
-            <span className="color-dot" style={{ background: "#cbd5e0" }} />
-            <span>{cat.name}</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: "4px" }}>
-              <button className="btn-del-cat" onClick={() => startEdit(cat)}>
-                <FiEdit2 size={12} />
+          <li key={cat.id} className="cat-item">
+            <div className="cat-info">
+              <span className="color-dot" style={{ background: cat.color }} />
+              <span className="cat-text">{cat.name}</span>
+            </div>
+            <div className="cat-actions">
+              <button onClick={() => startEdit(cat)} title="수정">
+                <FiEdit2 />
               </button>
               <button
-                className="btn-del-cat"
-                onClick={() => deleteCategory(cat.id)}
+                onClick={() => handleDelete(cat.id)}
+                className="danger"
+                title="삭제"
               >
-                <FiTrash2 size={12} />
+                <FiTrash2 />
               </button>
             </div>
           </li>

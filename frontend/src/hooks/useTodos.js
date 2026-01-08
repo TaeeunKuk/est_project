@@ -1,92 +1,95 @@
-// frontend/src/hooks/useTodos.js
-import { useState, useEffect, useCallback } from 'react';
-import { todoService } from '../services/todoService';
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
 
-/**
- * useTodos 훅
- * - selectedDate 기준으로 투두 목록을 불러오고 추가/삭제/토글 기능을 제공합니다.
- * - 반환값: { todos, loading, selectedDate, setSelectedDate, addTodo, deleteTodo, toggleTodo }
- *
- * @param {string|Date} initialDate 초기 선택 날짜 (optional)
- */
-const useTodos = (initialDate = null) => {
-  const [todos, setTodos] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(initialDate);
+// 초기 더미 데이터 생성 함수 (현재 날짜 기준)
+const getInitialTodos = () => {
+  const today = format(new Date(), "yyyy-MM-dd");
+  return [
+    {
+      id: 1,
+      title: "팀 회의 자료 준비하기",
+      isCompleted: false,
+      date: today,
+      categoryId: 1, // 업무
+    },
+    {
+      id: 2,
+      title: "점심 약속 (강남역)",
+      isCompleted: true,
+      date: today,
+      categoryId: 2, // 개인
+    },
+    {
+      id: 3,
+      title: "운동 가기 (헬스장)",
+      isCompleted: false,
+      date: today,
+      categoryId: 2, // 개인
+    },
+    {
+      id: 4,
+      title: "프로젝트 기획안 마감",
+      isCompleted: false,
+      date: today,
+      categoryId: 3, // 긴급
+    },
+  ];
+};
+
+const useTodos = (selectedDateStr) => {
+  // 전체 투두 리스트 상태 관리
+  const [allTodos, setAllTodos] = useState(getInitialTodos());
   const [loading, setLoading] = useState(false);
 
-  // 투두 목록을 서버에서 가져오는 함수
-  const fetchTodos = useCallback(async () => {
-    setLoading(true);
-    try {
-      // todoService.getTodos는 selectedDate를 기준으로 목록을 반환한다고 가정
-      const data = await todoService.getTodos(selectedDate);
-      // 백엔드가 null 또는 객체를 반환할 수 있으므로 배열인지 확인
-      setTodos(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('투두 로드 실패:', err);
-      setTodos([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedDate]);
+  // 1. [CREATE] 할 일 추가
+  const addTodo = (title, categoryId) => {
+    const newTodo = {
+      id: Date.now(), // 고유 ID 생성
+      title,
+      isCompleted: false,
+      date: selectedDateStr, // 현재 선택된 날짜에 추가
+      categoryId,
+    };
+    setAllTodos((prev) => [...prev, newTodo]);
+  };
 
-  // selectedDate가 바뀌거나 훅이 마운트될 때 목록을 불러옴
-  useEffect(() => {
-    fetchTodos();
-  }, [fetchTodos]);
+  // 2. [UPDATE] 할 일 수정 (내용 변경)
+  const updateTodo = (id, newTitle) => {
+    setAllTodos((prev) =>
+      prev.map((todo) => (todo.id === id ? { ...todo, title: newTitle } : todo))
+    );
+  };
 
-  // 투두 추가
-  const addTodo = async (title, categoryId = null) => {
-    if (!title || !String(title).trim()) return;
-    try {
-      await todoService.createTodo({
-        title: String(title).trim(),
-        categoryId: categoryId ?? null,
-        date: selectedDate,
-      });
-      await fetchTodos();
-    } catch (err) {
-      console.error('투두 추가 실패:', err);
-      // UI에서 처리할 수 있도록 예외를 던지거나 알림을 호출할 수 있음
-      throw err;
+  // 3. [DELETE] 할 일 삭제
+  const deleteTodo = (id) => {
+    if (window.confirm("이 할 일을 삭제하시겠습니까?")) {
+      setAllTodos((prev) => prev.filter((todo) => todo.id !== id));
     }
   };
 
-  // 투두 삭제
-  const deleteTodo = async (id) => {
-    if (!id) return;
-    try {
-      // 확인은 호출자(UI)에서 처리하는 것이 일반적
-      await todoService.deleteTodo(id);
-      await fetchTodos();
-    } catch (err) {
-      console.error('투두 삭제 실패:', err);
-      throw err;
-    }
+  // 4. [TOGGLE] 완료/미완료 상태 변경
+  const toggleTodo = (id) => {
+    setAllTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+      )
+    );
   };
 
-  // 완료 상태 토글
-  const toggleTodo = async (id, currentStatus) => {
-    if (!id) return;
-    try {
-      await todoService.updateTodo(id, { isCompleted: !currentStatus });
-      await fetchTodos();
-    } catch (err) {
-      console.error('토글 실패:', err);
-      throw err;
-    }
-  };
+  // 선택된 날짜에 해당하는 투두만 필터링해서 반환
+  // 실제 API 연동 시에는 여기서 useEffect로 fetch를 수행합니다.
+  const filteredTodos = allTodos.filter(
+    (todo) => todo.date === selectedDateStr
+  );
 
   return {
-    todos,
+    todos: filteredTodos, // 필터링된 리스트 반환
     loading,
-    selectedDate,
-    setSelectedDate,
     addTodo,
+    updateTodo,
     deleteTodo,
     toggleTodo,
   };
 };
 
 export default useTodos;
- 
