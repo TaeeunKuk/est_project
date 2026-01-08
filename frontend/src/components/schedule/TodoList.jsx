@@ -11,6 +11,7 @@ import {
   FiTag,
   FiChevronDown,
   FiAlertCircle,
+  FiFilter,
 } from "react-icons/fi";
 import "../../assets/styles/components/_todolist.scss";
 
@@ -28,18 +29,21 @@ const TodoList = ({
   const [newTodoTitle, setNewTodoTitle] = useState("");
   const [newTodoCatId, setNewTodoCatId] = useState(null);
   const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false); // 필터 드롭다운 상태
   const dropdownRef = useRef(null);
+  const filterRef = useRef(null); // 필터 참조
   const [filterCatId, setFilterCatId] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
-
-  // 삭제 확인 모달 상태
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsCatDropdownOpen(false);
+      }
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -52,7 +56,10 @@ const TodoList = ({
   });
 
   const handleAdd = () => {
-    if (!newTodoTitle.trim()) return;
+    if (!newTodoTitle.trim()) {
+      alert("할 일을 입력해주세요.");
+      return;
+    }
     onAdd({
       title: newTodoTitle,
       categoryId: newTodoCatId ? Number(newTodoCatId) : null,
@@ -84,35 +91,72 @@ const TodoList = ({
     setEditTitle("");
   };
 
-  // 삭제 확인 핸들러
-  const requestDelete = (id) => {
-    setDeleteConfirmId(id);
-  };
-
-  const confirmDelete = () => {
-    onDelete(deleteConfirmId);
-    setDeleteConfirmId(null);
-  };
-
   const selectedCategory = categories.find((c) => c.id === newTodoCatId);
+  const activeFilterCategory = categories.find(
+    (c) => c.id === Number(filterCatId)
+  );
 
   return (
     <div className="todo-list-container">
+      {/* 1. 상단 필터 영역 (커스텀 드롭다운 적용) */}
       <div className="top-control-bar">
-        <select
-          className="filter-select"
-          value={filterCatId}
-          onChange={(e) => setFilterCatId(e.target.value)}
+        <div
+          className="custom-dropdown-container filter-dropdown"
+          ref={filterRef}
         >
-          <option value="">모든 카테고리 보기</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+          <button
+            className={`dropdown-trigger ${
+              activeFilterCategory ? "has-value" : ""
+            }`}
+            onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+          >
+            <div className="trigger-content">
+              <FiFilter className="icon" />
+              <span className="text">
+                {activeFilterCategory
+                  ? activeFilterCategory.name
+                  : "모든 카테고리 보기"}
+              </span>
+            </div>
+            <FiChevronDown className="arrow" />
+          </button>
+
+          {isFilterDropdownOpen && (
+            <ul className="dropdown-menu">
+              <li
+                className="dropdown-item"
+                onClick={() => {
+                  setFilterCatId("");
+                  setIsFilterDropdownOpen(false);
+                }}
+              >
+                <span className="text-gray">모든 카테고리 보기</span>
+              </li>
+              {categories.map((c) => (
+                <li
+                  key={c.id}
+                  className="dropdown-item"
+                  onClick={() => {
+                    setFilterCatId(c.id);
+                    setIsFilterDropdownOpen(false);
+                  }}
+                >
+                  <span
+                    className="color-circle"
+                    style={{ background: c.color }}
+                  />
+                  <span>{c.name}</span>
+                  {Number(filterCatId) === c.id && (
+                    <FiCheckSquare className="check" color={c.color} />
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
+      {/* 2. 할 일 입력 영역 */}
       <div className="creation-card">
         <div className="input-row">
           <input
@@ -191,9 +235,6 @@ const TodoList = ({
                         style={{ background: c.color }}
                       />
                       <span>{c.name}</span>
-                      {newTodoCatId === c.id && (
-                        <FiCheckSquare className="check" color={c.color} />
-                      )}
                     </li>
                   ))}
                 </ul>
@@ -210,6 +251,7 @@ const TodoList = ({
         </div>
       </div>
 
+      {/* 3. 리스트 영역 */}
       <div className="list-scroll-area">
         {loading ? (
           <p className="status-msg">로딩 중...</p>
@@ -293,7 +335,7 @@ const TodoList = ({
                         </button>
                         <button
                           className="icon-btn delete"
-                          onClick={() => requestDelete(todo.id)}
+                          onClick={() => setDeleteConfirmId(todo.id)}
                         >
                           <FiTrash2 />
                         </button>
@@ -307,7 +349,7 @@ const TodoList = ({
         )}
       </div>
 
-      {/* 내부 커스텀 삭제 확인 모달 */}
+      {/* 삭제 확인 커스텀 모달 */}
       {deleteConfirmId && (
         <div className="mini-modal-overlay">
           <div className="mini-modal">
@@ -323,7 +365,13 @@ const TodoList = ({
               >
                 취소
               </button>
-              <button className="btn-confirm" onClick={confirmDelete}>
+              <button
+                className="btn-confirm"
+                onClick={() => {
+                  onDelete(deleteConfirmId);
+                  setDeleteConfirmId(null);
+                }}
+              >
                 삭제하기
               </button>
             </div>

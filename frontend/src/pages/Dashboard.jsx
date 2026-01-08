@@ -117,7 +117,7 @@ const DashboardInner = () => {
             <h1>My Scheduler</h1>
           </div>
           <div className="user-info">
-            <span>{user?.name || "User"}님</span>
+            <span>환영합니다 {user?.name || "User"}님!</span>
             <button className="btn-logout" onClick={logout}>
               로그아웃
             </button>
