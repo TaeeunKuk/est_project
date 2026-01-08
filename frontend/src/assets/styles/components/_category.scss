@@ -36,6 +36,11 @@
   @include m.flex-column;
   gap: 20px;
 
+  // [중요] 내부 오버레이(mini-modal)가 이 영역 안에서만 뜨도록 설정
+  position: relative;
+  overflow: hidden; // 오버레이가 둥근 모서리를 넘치지 않게 함
+  border-radius: 12px; // 필요한 경우 컨테이너 자체 라운딩
+
   .input-row {
     display: flex;
     gap: 10px;
@@ -65,6 +70,7 @@
       cursor: pointer;
       @include m.flex-center;
       transition: 0.2s;
+      flex-shrink: 0; // 버튼이 찌그러지지 않도록
       &:hover {
         background: #000;
       }
@@ -168,5 +174,90 @@
         }
       }
     }
+  }
+
+  // --- 투두리스트 스타일의 미니 모달 오버레이 ---
+  .mini-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9); // 배경을 약간 더 불투명하게 처리
+    backdrop-filter: blur(2px);
+    @include m.flex-center;
+    z-index: 10;
+    border-radius: 12px;
+
+    .mini-modal {
+      background: v.$white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      width: 260px; // 투두리스트보다 약간 작게 조정 (컨테이너 크기 고려)
+      border: 1px solid v.$border-light;
+      animation: modalFadeIn 0.2s ease-out;
+
+      .icon-area {
+        color: v.$danger-color;
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: center;
+      }
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: v.$text-main;
+        margin-bottom: 8px;
+      }
+      p {
+        font-size: 0.9rem;
+        color: v.$text-sub;
+        margin-bottom: 20px;
+        word-break: keep-all; // 한글 줄바꿈 최적화
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 8px;
+        button {
+          flex: 1;
+          padding: 10px;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 0.9rem;
+          cursor: pointer;
+          border: none;
+        }
+        .btn-cancel {
+          background: v.$bg-color;
+          color: v.$text-sub;
+          &:hover {
+            background: #e2e8f0;
+          }
+        }
+        .btn-confirm {
+          background: v.$danger-color;
+          color: v.$white;
+          &:hover {
+            background: #c53030;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 애니메이션 키프레임 (없을 경우 추가)
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

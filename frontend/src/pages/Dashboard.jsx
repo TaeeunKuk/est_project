@@ -44,9 +44,12 @@ const DashboardInner = () => {
       if (filterMode === "daily") {
         return todoDateStr === format(selectedDate, "yyyy-MM-dd");
       } else {
-        if (!startDate || !endDate) return false;
+        if (!startDate) return false;
+
+        const effectiveEndDate = endDate || startDate;
+
         const targetStart = format(startDate, "yyyy-MM-dd");
-        const targetEnd = format(endDate, "yyyy-MM-dd");
+        const targetEnd = format(effectiveEndDate, "yyyy-MM-dd");
         return todoDateStr >= targetStart && todoDateStr <= targetEnd;
       }
     });
@@ -72,18 +75,29 @@ const DashboardInner = () => {
     }
   };
 
-  const CustomDateInput = forwardRef(({ value, onClick }, ref) => (
-    <button
-      className={`filter-btn custom-picker-btn ${
-        filterMode === "custom" ? "active" : ""
-      }`}
-      onClick={onClick}
-      ref={ref}
-    >
-      <FiCalendar className="icon" />
-      <span>{value || "기간 선택"}</span>
-    </button>
-  ));
+  // DatePicker 입력 버튼 커스텀
+  const CustomDateInput = forwardRef(({ value, onClick }, ref) => {
+    let displayValue = value;
+    if (filterMode === "custom" && startDate) {
+      const startStr = format(startDate, "yyyy/MM/dd");
+      const endStr = endDate ? format(endDate, "yyyy/MM/dd") : startStr;
+      displayValue = `${startStr} ~ ${endStr}`;
+    }
+
+    return (
+      <button
+        className={`filter-btn custom-picker-btn ${
+          filterMode === "custom" ? "active" : ""
+        }`}
+        onClick={onClick}
+        ref={ref}
+      >
+        {/* 아이콘에 오른쪽 여백 추가 */}
+        <FiCalendar className="icon" style={{ marginRight: "8px" }} />
+        <span>{displayValue || "기간 선택"}</span>
+      </button>
+    );
+  });
 
   const tileContent = ({ date, view }) => {
     if (view === "month") {
@@ -103,12 +117,21 @@ const DashboardInner = () => {
     return null;
   };
 
-  // --- 진행률 데이터 계산 (복구) ---
+  // --- 진행률 데이터 계산 ---
   const totalTodos = filteredTodos.length;
   const completedTodos = filteredTodos.filter((t) => t.is_completed).length;
   const remainingTodos = totalTodos - completedTodos;
   const progressPercentage =
     totalTodos === 0 ? 0 : Math.round((completedTodos / totalTodos) * 100);
+
+  // 날짜 표시 헬퍼 함수
+  const renderDateRangeText = () => {
+    if (!startDate) return "";
+    const startStr = format(startDate, "yyyy/MM/dd");
+    const endStr = endDate ? format(endDate, "yyyy/MM/dd") : startStr;
+
+    return `${startStr} ~ ${endStr}`;
+  };
 
   return (
     <div className="dashboard-container">
@@ -152,8 +175,8 @@ const DashboardInner = () => {
               </h3>
               <span className="date-badge">
                 {filterMode === "daily"
-                  ? format(selectedDate, "M월 d일")
-                  : `${format(startDate, "M.d")}~${format(endDate, "M.d")}`}
+                  ? format(selectedDate, "yyyy/MM/dd")
+                  : renderDateRangeText()}
               </span>
             </div>
             <div className="status-body">
@@ -176,7 +199,6 @@ const DashboardInner = () => {
                   <span className="label">완료</span>
                   <span className="value completed">{completedTodos}</span>
                 </div>
-                {/* 미완료(미진행) 섹션 복구 */}
                 <div className="info-item">
                   <span className="label">미완료</span>
                   <span className="value remaining">{remainingTodos}</span>
@@ -193,14 +215,17 @@ const DashboardInner = () => {
                 <h2>
                   {filterMode === "daily" ? (
                     <>
-                      {format(selectedDate, "MM월 dd일")}{" "}
+                      {format(selectedDate, "yyyy/MM/dd")}{" "}
                       <span className="weekday">
                         {format(selectedDate, "EEEE", { locale: ko })}
                       </span>
                     </>
                   ) : (
                     <>
-                      {format(startDate, "MM.dd")} ~ {format(endDate, "MM.dd")}{" "}
+                      {startDate && format(startDate, "yyyy/MM/dd")}
+                      {" ~ "}
+                      {startDate &&
+                        format(endDate || startDate, "yyyy/MM/dd")}{" "}
                       <span className="weekday">
                         {filterMode === "weekly" ? " 주간 일정" : " 기간 일정"}
                       </span>
@@ -236,6 +261,7 @@ const DashboardInner = () => {
                     onChange={(update) => setDateRange(update)}
                     customInput={<CustomDateInput />}
                     locale={ko}
+                    dateFormat="yyyy/MM/dd"
                   />
                 </div>
               </div>
