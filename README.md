@@ -65,7 +65,9 @@ npm run dev
 
 ---
 
-2. ERD 및 테이블 설계 설명
+## 2. ERD 및 테이블 설계 설명
+
+<img width="997" height="645" alt="ERD 다이어그램" src="https://github.com/user-attachments/assets/d4f1ae9d-2208-4796-95ed-ea9e5814143b" />
 
 ### 2-1.
 
