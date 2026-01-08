@@ -1,59 +1,49 @@
-// frontend/src/api/index.js
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api", // 백엔드 주소 확인
+  baseURL: "http://localhost:8080/api",
   headers: { "Content-Type": "application/json" },
-  withCredentials: true,
+  withCredentials: true, // [필수] 쿠키 전송
 });
 
-// // [추가] 요청 인터셉터: 모든 요청 헤더에 Access Token 탑재
-// apiClient.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem('accessToken');
-//     if (token) {
-//       config.headers['Authorization'] = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
 
-// // 응답 인터셉터 (토큰 만료 시 자동 갱신 로직)
-// apiClient.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
+    // 1. 이미 '토큰 갱신 요청'이 실패한 경우 (재시도 금지)
+    if (originalRequest.url.includes("/auth/refresh")) {
+      // [핵심 수정] 현재 페이지가 로그인 페이지가 아닐 때만 이동
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
 
-//     // 401(Unauthorized) 또는 419(Custom) 에러 발생 시
-//     if ((error.response?.status === 401 || error.response?.status === 419) && !originalRequest._retry) {
-//       originalRequest._retry = true;
+    // 2. 401 에러이고, 아직 재시도를 안 했다면?
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-//       try {
-//         // 로컬 스토리지에서 Refresh Token 가져오기
-//         const refreshToken = localStorage.getItem('refreshToken');
+      try {
+        // 토큰 갱신 시도
+        await apiClient.post("/auth/refresh");
 
-//         // [수정] 경로를 /auth/refresh로 통일하고, body에 refreshToken 전달
-//         const { data } = await apiClient.post('/auth/refresh', { refreshToken });
+        // 갱신 성공 시 원래 요청 재시도
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // 갱신 실패 시 로그아웃 처리
+        console.error("세션 만료, 로그아웃");
 
-//         // 새 Access Token 저장
-//         localStorage.setItem('accessToken', data.accessToken);
+        // [핵심 수정] 현재 페이지가 로그인 페이지가 아닐 때만 이동 (무한 루프 방지)
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
+        return Promise.reject(refreshError);
+      }
+    }
 
-//         // 실패했던 요청의 헤더를 새 토큰으로 교체 후 재요청
-//         originalRequest.headers['Authorization'] = `Bearer ${data.accessToken}`;
-//         return apiClient(originalRequest);
-
-//       } catch (refreshError) {
-//         console.error('Refresh Token expired or invalid', refreshError);
-//         // 갱신 실패 시 로그아웃 처리
-//         localStorage.removeItem('accessToken');
-//         localStorage.removeItem('refreshToken');
-//         window.location.href = '/login';
-//         return Promise.reject(refreshError);
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;
