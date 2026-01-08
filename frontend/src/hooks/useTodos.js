@@ -1,6 +1,5 @@
-// frontend/src/hooks/useTodos.js
 import { useState, useEffect, useCallback } from "react";
-import * as todoService from "../services/todoService"; // API 서비스 임포트
+import * as todoService from "../services/todoService";
 
 const useTodos = () => {
   const [todos, setTodos] = useState([]);
@@ -12,7 +11,6 @@ const useTodos = () => {
     setLoading(true);
     try {
       const data = await todoService.fetchTodos();
-      // DB에서 가져온 데이터는 snake_case일 수 있으므로 그대로 사용하거나 필요한 경우 여기서 매핑
       setTodos(data);
     } catch (err) {
       console.error("할 일 목록 로딩 실패:", err);
@@ -22,7 +20,6 @@ const useTodos = () => {
     }
   }, []);
 
-  // 마운트 시 자동 실행
   useEffect(() => {
     loadTodos();
   }, [loadTodos]);
@@ -35,28 +32,22 @@ const useTodos = () => {
       return newTodo;
     } catch (err) {
       console.error("할 일 추가 실패:", err);
-      alert("할 일을 저장하지 못했습니다.");
     }
   };
 
-  // 3. [UPDATE] 할 일 수정 (내용, 날짜, 카테고리 등)
+  // 3. [UPDATE] 할 일 수정
   const updateTodo = async (id, updatedData) => {
     try {
-      // API 호출
       const updated = await todoService.updateTodo(id, updatedData);
-
-      // 상태 업데이트
       setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
     } catch (err) {
       console.error("할 일 수정 실패:", err);
-      alert("수정에 실패했습니다.");
     }
   };
 
-  // 4. [DELETE] 할 일 삭제
+  // 4. [DELETE] 할 일 삭제 (window.confirm 제거됨)
   const deleteTodo = async (id) => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
+    // TodoList 컴포넌트의 커스텀 모달에서 이미 확인을 거치므로 바로 삭제 로직 실행
     try {
       await todoService.deleteTodo(id);
       setTodos((prev) => prev.filter((t) => t.id !== id));
@@ -69,27 +60,20 @@ const useTodos = () => {
   // 5. [TOGGLE] 완료 상태 변경
   const toggleTodo = async (id) => {
     try {
-      // 낙관적 업데이트 (UI 먼저 반영)
       setTodos((prev) =>
         prev.map((t) =>
           t.id === id ? { ...t, is_completed: !t.is_completed } : t
         )
       );
-
-      // API 요청
       await todoService.toggleTodoStatus(id);
-
-      // 필요시 정확성을 위해 다시 로드 (선택 사항)
-      // loadTodos();
     } catch (err) {
       console.error("완료 상태 변경 실패:", err);
-      // 에러 발생 시 원래대로 복구하려면 loadTodos() 호출
       loadTodos();
     }
   };
 
   return {
-    todos, // 전체 리스트 (필터링은 컴포넌트에서 수행)
+    todos,
     loading,
     error,
     addTodo,

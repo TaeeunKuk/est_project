@@ -49,6 +49,10 @@
           font-weight: 600;
           font-size: 0.9rem;
           transition: 0.2s;
+          &:hover {
+            color: #4a5568;
+            background: rgba(0, 0, 0, 0.03);
+          }
           &.active {
             background: v.$white;
             color: v.$primary-color;
@@ -71,18 +75,29 @@
   @include m.flex-column;
   height: 100%;
   overflow: hidden;
-  position: relative; // 모달 위치 기준
+  position: relative;
 
   .top-control-bar {
     display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
+    flex-shrink: 0;
+
     .filter-select {
       height: 38px;
       padding: 0 12px;
       border: 1px solid v.$border-color;
       border-radius: 8px;
+      background: v.$white;
+      color: #4a5568;
+      font-size: 0.9rem;
+      outline: none;
       flex: 1;
       max-width: 200px;
+      &:focus {
+        border-color: v.$primary-color;
+      }
     }
   }
 
@@ -94,6 +109,7 @@
     margin-bottom: 20px;
     @include m.flex-column;
     gap: 12px;
+    flex-shrink: 0;
 
     .input-row {
       display: flex;
@@ -104,6 +120,13 @@
         padding: 0 16px;
         border: 1px solid v.$border-color;
         border-radius: 10px;
+        font-size: 1rem;
+        outline: none;
+        background: v.$white;
+        &:focus {
+          border-color: v.$primary-color;
+          box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+        }
       }
       .btn-add {
         width: 44px;
@@ -111,33 +134,98 @@
         background: v.$primary-color;
         color: v.$white;
         border-radius: 10px;
+        font-size: 1.4rem;
         @include m.flex-center;
+        flex-shrink: 0;
+        &:hover {
+          background: v.$primary-hover;
+        }
       }
     }
 
-    .options-row .option-group {
+    .options-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      .custom-dropdown-container {
+      gap: 16px;
+      padding-top: 4px;
+      .option-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         position: relative;
-        .dropdown-trigger {
-          @include m.flex-between;
-          padding: 4px 10px;
-          background: v.$white;
-          border: 1px solid v.$border-color;
-          border-radius: 8px;
-          width: 160px;
+        .label {
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: v.$text-sub;
         }
-        .dropdown-menu {
-          position: absolute;
-          top: 110%;
-          left: 0;
-          width: 100%;
-          background: v.$white;
-          border: 1px solid v.$border-color;
-          border-radius: 8px;
-          z-index: 100;
+        .custom-dropdown-container {
+          position: relative;
+          .dropdown-trigger {
+            @include m.flex-between;
+            gap: 6px;
+            padding: 4px 10px;
+            background: v.$white;
+            border: 1px solid v.$border-color;
+            border-radius: 8px;
+            color: v.$text-sub;
+            font-size: 0.85rem;
+            font-weight: 500;
+            width: 160px;
+            transition: 0.2s;
+            .trigger-content {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              overflow: hidden;
+              .dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+              .text {
+                @include m.text-ellipsis;
+              }
+            }
+            .arrow {
+              font-size: 1rem;
+              color: v.$text-light;
+              flex-shrink: 0;
+            }
+          }
+          .dropdown-menu {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            width: 100%;
+            min-width: 160px;
+            background: v.$white;
+            border: 1px solid v.$border-color;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            padding: 4px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            .dropdown-item {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              padding: 8px 12px;
+              font-size: 0.9rem;
+              cursor: pointer;
+              color: #4a5568;
+              &:hover {
+                background: #f7fafc;
+              }
+              .color-circle {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                flex-shrink: 0;
+              }
+            }
+          }
         }
       }
     }
@@ -146,64 +234,91 @@
   .list-scroll-area {
     flex: 1;
     overflow-y: auto;
+    padding-right: 6px;
+    padding-bottom: 20px;
     @include m.custom-scrollbar;
+    .status-msg,
+    .empty-msg {
+      text-align: center;
+      color: v.$text-light;
+      margin-top: 40px;
+    }
   }
 
-  .todo-items .todo-item {
-    display: flex;
-    align-items: center;
-    background: v.$white;
-    border: 1px solid v.$border-light;
-    margin-bottom: 10px;
-    padding: 14px 18px;
-    border-radius: 12px;
-    &:hover .actions {
-      opacity: 1;
-      visibility: visible;
-    }
-    &.done {
-      background: #f9fafb;
-      .content .text {
-        text-decoration: line-through;
-        color: #cbd5e0;
-      }
-    }
-    .check-icon {
-      color: v.$primary-color;
-      cursor: pointer;
-      margin-right: 14px;
-    }
-    .content {
-      flex: 1;
-      .cat-badge {
-        font-size: 0.7rem;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-weight: 700;
-      }
-    }
-    .actions {
+  .todo-items {
+    .todo-item {
       display: flex;
-      gap: 6px;
-      opacity: 0;
-      visibility: hidden;
-      .icon-btn {
-        color: v.$text-light;
-        &.delete:hover {
-          color: v.$danger-color;
+      align-items: center;
+      background: v.$white;
+      border: 1px solid v.$border-light;
+      margin-bottom: 10px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      &:hover {
+        border-color: #cbd5e0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        .actions {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+      &.done {
+        background: #f9fafb;
+        .content .text {
+          text-decoration: line-through;
+          color: #cbd5e0;
+        }
+      }
+      .check-icon {
+        color: v.$primary-color;
+        cursor: pointer;
+        margin-right: 14px;
+        @include m.flex-center;
+      }
+      .content {
+        flex: 1;
+        @include m.flex-column;
+        gap: 4px;
+        .cat-badge {
+          font-size: 0.7rem;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-weight: 700;
+        }
+        .text {
+          font-size: 1rem;
+          color: v.$text-main;
+        }
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s;
+        .icon-btn {
+          color: v.$text-light;
+          padding: 4px;
+          &:hover {
+            color: v.$primary-color;
+          }
+          &.delete:hover {
+            color: v.$danger-color;
+          }
         }
       }
     }
   }
 
-  // 커스텀 미니 모달 스타일
+  // --- 추가된 커스텀 모달 스타일만 유지 ---
   .mini-modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(2px);
     @include m.flex-center;
     z-index: 500;
@@ -213,7 +328,7 @@
       background: v.$white;
       padding: 24px;
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
       text-align: center;
       width: 280px;
       border: 1px solid v.$border-light;
@@ -224,7 +339,6 @@
         font-size: 2.5rem;
         margin-bottom: 12px;
       }
-
       h3 {
         font-size: 1.1rem;
         font-weight: 700;
@@ -246,21 +360,14 @@
           border-radius: 8px;
           font-weight: 600;
           font-size: 0.9rem;
-          transition: 0.2s;
         }
         .btn-cancel {
           background: v.$bg-color;
           color: v.$text-sub;
-          &:hover {
-            background: #e2e8f0;
-          }
         }
         .btn-confirm {
           background: v.$danger-color;
           color: v.$white;
-          &:hover {
-            background: darken(v.$danger-color, 5%);
-          }
         }
       }
     }
@@ -270,10 +377,10 @@
 @keyframes modalFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(10px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
   }
 }

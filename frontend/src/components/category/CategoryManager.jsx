@@ -1,4 +1,3 @@
-// frontend/src/components/category/CategoryManager.jsx
 import React, { useState } from "react";
 import { FiEdit2, FiTrash2, FiPlus, FiCheck } from "react-icons/fi";
 
@@ -24,15 +23,11 @@ const CategoryManager = ({ categories, onAdd, onUpdate, onDelete }) => {
 
     try {
       if (editModeId) {
-        // [수정] Hook에서 받은 함수 실행
         await onUpdate(editModeId, inputName.trim(), selectedColor);
         setEditModeId(null);
       } else {
-        // [생성] Hook에서 받은 함수 실행
         await onAdd(inputName.trim(), selectedColor);
       }
-
-      // 입력창 초기화
       setInputName("");
       setSelectedColor(colorPalette[0]);
     } catch (error) {
@@ -57,74 +52,61 @@ const CategoryManager = ({ categories, onAdd, onUpdate, onDelete }) => {
   };
 
   return (
-    <div className="category-manager">
+    <div className="category-manager-modal">
+      {/* 입력 영역 */}
       <div className="input-row">
         <input
+          className="cat-input"
           value={inputName}
           onChange={(e) => setInputName(e.target.value)}
-          placeholder={editModeId ? "카테고리 수정" : "새 카테고리"}
+          placeholder={editModeId ? "카테고리 수정" : "새 카테고리 명 입력"}
           onKeyPress={(e) => e.key === "Enter" && handleAddOrUpdate()}
         />
-        <button onClick={handleAddOrUpdate}>
+        <button className="btn-save" onClick={handleAddOrUpdate}>
           {editModeId ? "수정" : <FiPlus />}
         </button>
       </div>
 
-      <div
-        className="palette"
-        style={{ display: "flex", gap: "5px", margin: "10px 0" }}
-      >
-        {colorPalette.map((color) => (
-          <div
-            key={color}
-            onClick={() => setSelectedColor(color)}
-            style={{
-              backgroundColor: color,
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              border: selectedColor === color ? "2px solid black" : "none",
-            }}
-          >
-            {selectedColor === color && <FiCheck color="white" size={10} />}
-          </div>
-        ))}
+      {/* 컬러 피커 영역 */}
+      <div className="color-picker-row">
+        <span className="label">색상 선택</span>
+        <div className="palette">
+          {colorPalette.map((color) => (
+            <div
+              key={color}
+              className={`color-circle ${
+                selectedColor === color ? "selected" : ""
+              }`}
+              onClick={() => setSelectedColor(color)}
+              style={{ backgroundColor: color }}
+            >
+              {selectedColor === color && <FiCheck color="white" size={14} />}
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* 리스트 영역 */}
       <ul className="cat-list">
         {categories.map((cat) => (
-          <li
-            key={cat.id}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              margin: "5px 0",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <li key={cat.id} className="cat-item">
+            <div className="cat-info">
               <span
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  backgroundColor: cat.color,
-                  borderRadius: "50%",
-                }}
+                className="color-dot"
+                style={{ backgroundColor: cat.color }}
               />
-              <span>{cat.name}</span>
+              <span className="cat-text">{cat.name}</span>
             </div>
-            <div>
-              <button
-                onClick={() => startEdit(cat)}
-                style={{ marginRight: "5px" }}
-              >
-                <FiEdit2 />
+            <div className="cat-actions">
+              <button onClick={() => startEdit(cat)} title="수정">
+                <FiEdit2 size={16} />
               </button>
-              <button onClick={() => handleDelete(cat.id)}>
-                <FiTrash2 />
+              <button
+                className="danger"
+                onClick={() => handleDelete(cat.id)}
+                title="삭제"
+              >
+                <FiTrash2 size={16} />
               </button>
             </div>
           </li>
