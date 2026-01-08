@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.jsx
 import React, { useState, forwardRef, useMemo } from "react";
 import Calendar from "react-calendar";
 import DatePicker from "react-datepicker";
