@@ -103,7 +103,6 @@ const DashboardInner = () => {
     return null;
   };
 
-  // --- 진행률 데이터 계산 (복구) ---
   const totalTodos = filteredTodos.length;
   const completedTodos = filteredTodos.filter((t) => t.is_completed).length;
   const remainingTodos = totalTodos - completedTodos;
@@ -144,7 +143,6 @@ const DashboardInner = () => {
             />
           </div>
 
-          {/* 진행률 카드 영역 */}
           <div className="card status-card">
             <div className="status-header">
               <h3>
@@ -176,7 +174,6 @@ const DashboardInner = () => {
                   <span className="label">완료</span>
                   <span className="value completed">{completedTodos}</span>
                 </div>
-                {/* 미완료(미진행) 섹션 복구 */}
                 <div className="info-item">
                   <span className="label">미완료</span>
                   <span className="value remaining">{remainingTodos}</span>
