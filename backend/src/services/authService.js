@@ -113,6 +113,6 @@ exports.logout = async (userId) => {
  * 유저 정보 조회 (내 정보 가져오기용)
  */
 exports.findUserById = async (userId) => {
-  const user = await userModel.findById(userId); // userModel에 findById 구현 가정
+  const user = await userModel.findById(userId);
   return user;
 };

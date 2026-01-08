@@ -90,7 +90,7 @@ exports.logout = async (req, res) => {
   }
 };
 
-// getMe는 그대로 두셔도 됩니다 (미들웨어에서 처리)
+// getMe는 그대로 (미들웨어에서 처리)
 exports.getMe = async (req, res) => {
   const userId = req.user.id;
   const user = await authService.findUserById(userId);

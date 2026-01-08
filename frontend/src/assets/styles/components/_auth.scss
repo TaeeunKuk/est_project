@@ -6,7 +6,7 @@
   min-height: 100vh;
   @include m.flex-center;
   background-color: v.$bg-color;
-  overflow-y: auto; // 내용이 많을 때 스크롤 허용
+  padding: 20px; // 모바일 여백 추가
 }
 
 .auth-card {
@@ -15,14 +15,15 @@
   max-width: 400px;
   padding: 48px 40px;
   text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); // 카드 입체감 추가
 
   .brand {
     margin-bottom: 32px;
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       color: v.$primary-color;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: -1px;
     }
   }
 
@@ -36,9 +37,9 @@
   .error-msg {
     color: v.$danger-color;
     background-color: #fff5f5;
-    padding: 10px;
+    padding: 12px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin-bottom: 20px;
     border: 1px solid #fed7d7;
   }
@@ -47,10 +48,38 @@
     @include m.flex-column;
     gap: 16px;
 
-    // 공통 입력창 스타일은 _common.scss에서 상속받거나 직접 사용
-    // 여기서는 버튼 마진만 추가
+    input {
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+
+      &:focus {
+        outline: none;
+        border-color: v.$primary-color;
+      }
+    }
+
     button {
       margin-top: 8px;
+      padding: 14px;
+      background-color: v.$primary-color; // 버튼 배경색 추가
+      color: white; // 글자색 흰색으로 설정
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+
+      &:hover {
+        background-color: darken(v.$primary-color, 5%); // 호버 시 약간 어둡게
+      }
+
+      &:active {
+        transform: scale(0.98); // 클릭 시 눌리는 효과
+      }
     }
   }
 
@@ -63,6 +92,8 @@
       color: v.$primary-color;
       font-weight: 600;
       margin-left: 6px;
+      text-decoration: none;
+
       &:hover {
         text-decoration: underline;
       }
