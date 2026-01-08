@@ -1,13 +1,18 @@
 // frontend/src/services/authService.js
-import apiClient from '../api';
+import apiClient from "../api";
 
 export const authService = {
-  // 회원가입
-  signUp: (data) => apiClient.post('/users/signup', data),
-  
-  // 로그인
-  login: (data) => apiClient.post('/users/login', data),
-  
-  // 로그아웃
-  logout: () => apiClient.post('/users/logout'),
+  // [수정] 백엔드 라우트(/api/auth/signup)에 맞춰 경로 수정
+  signUp: async (userInfo) => {
+    // API 주소: http://localhost:8080/api/auth/signup
+    return await apiClient.post("/auth/signup", userInfo);
+  },
+
+  login: async (credentials) => {
+    return await apiClient.post("/auth/login", credentials);
+  },
+
+  logout: async () => {
+    return await apiClient.post("/auth/logout");
+  },
 };
