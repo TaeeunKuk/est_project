@@ -1,3 +1,4 @@
+// backend/src/controllers/authController.js
 const authService = require("../services/authService");
 
 // 쿠키 옵션 (보안 설정)

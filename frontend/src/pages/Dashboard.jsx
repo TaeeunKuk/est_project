@@ -1,7 +1,7 @@
 // frontend/src/pages/Dashboard.jsx
-import React, { useState, forwardRef } from "react";
+import React, { useState, forwardRef, useMemo } from "react";
 import Calendar from "react-calendar";
-import DatePicker from "react-datepicker"; // 라이브러리 추가
+import DatePicker from "react-datepicker";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { ko } from "date-fns/locale";
 import { FiX, FiCalendar } from "react-icons/fi";
@@ -9,6 +9,7 @@ import { FiX, FiCalendar } from "react-icons/fi";
 // Context & Hooks
 import { AuthProvider, useAuth } from "../context/AuthContext";
 import useTodos from "../hooks/useTodos";
+import useCategories from "../hooks/useCategories";
 
 // Components
 import CategoryManager from "../components/category/CategoryManager";
@@ -17,64 +18,83 @@ import TodoList from "../components/schedule/TodoList";
 // Styles
 import "../assets/styles/main.scss";
 import "react-calendar/dist/Calendar.css";
-import "react-datepicker/dist/react-datepicker.css"; // datepicker css
+import "react-datepicker/dist/react-datepicker.css";
 import "../assets/styles/components/_calendar.scss";
 
 const DashboardInner = () => {
   const { user, logout } = useAuth();
 
   // --- 상태 관리 ---
-  // 1. 왼쪽 미니 캘린더용 (단일 날짜)
   const [selectedDate, setSelectedDate] = useState(new Date());
-
-  // 2. 우측 리스트 필터용 (기간)
   const [dateRange, setDateRange] = useState([new Date(), new Date()]);
   const [startDate, endDate] = dateRange;
 
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-  const [filterMode, setFilterMode] = useState("daily"); // daily | weekly | custom
+  const [filterMode, setFilterMode] = useState("daily");
 
-  // 카테고리 상태 (임시 데이터)
-  const [categories, setCategories] = useState([
-    { id: 1, name: "업무", color: "#3182ce" },
-    { id: 2, name: "개인", color: "#38a169" },
-    { id: 3, name: "긴급", color: "#e53e3e" },
-  ]);
+  // --- Data Fetching ---
+  const {
+    categories,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    loading: catLoading,
+  } = useCategories();
 
-  // Hook에 전달할 날짜 파라미터 구성
-  // (실제 구현 시에는 startDate, endDate를 모두 백엔드에 전달하여 필터링해야 합니다)
-  const queryDate = format(startDate || new Date(), "yyyy-MM-dd");
+  const {
+    todos,
+    loading: todoLoading,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    updateTodo,
+  } = useTodos();
 
-  const { todos, loading, addTodo, toggleTodo, deleteTodo, updateTodo } =
-    useTodos(queryDate);
+  // --- 필터링 로직 ---
+  const filteredTodos = useMemo(() => {
+    if (!todos) return [];
+
+    return todos.filter((todo) => {
+      const todoDateStr =
+        todo.date && typeof todo.date === "string"
+          ? todo.date.substring(0, 10)
+          : "";
+
+      if (!todoDateStr) return false;
+
+      if (filterMode === "daily") {
+        const targetStr = format(selectedDate, "yyyy-MM-dd");
+        return todoDateStr === targetStr;
+      } else {
+        if (!startDate || !endDate) return false;
+        const targetStart = format(startDate, "yyyy-MM-dd");
+        const targetEnd = format(endDate, "yyyy-MM-dd");
+        return todoDateStr >= targetStart && todoDateStr <= targetEnd;
+      }
+    });
+  }, [todos, filterMode, selectedDate, startDate, endDate]);
 
   // --- 핸들러 ---
-
-  // 1. 왼쪽 캘린더 클릭 -> 해당 날짜의 '오늘' 보기로 초기화
   const handleCalendarChange = (date) => {
     setSelectedDate(date);
-    setDateRange([date, date]); // 기간을 해당 날짜 하루로 설정
+    setDateRange([date, date]);
     setFilterMode("daily");
   };
 
-  // 2. 필터 버튼 클릭 (오늘 / 이번주)
   const handleFilterClick = (mode) => {
     setFilterMode(mode);
     const today = new Date();
 
     if (mode === "daily") {
-      // 오늘 날짜로 세팅 (또는 selectedDate 유지 정책에 따라 변경 가능)
       setDateRange([today, today]);
       setSelectedDate(today);
     } else if (mode === "weekly") {
-      // 이번 주 (월~일) 계산
       const start = startOfWeek(today, { weekStartsOn: 1 });
       const end = endOfWeek(today, { weekStartsOn: 1 });
       setDateRange([start, end]);
     }
   };
 
-  // 3. DatePicker 커스텀 인풋 버튼
   const CustomDateInput = forwardRef(({ value, onClick }, ref) => (
     <button
       className={`filter-btn custom-picker-btn ${
@@ -88,20 +108,29 @@ const DashboardInner = () => {
     </button>
   ));
 
-  // 4. 캘린더 점 찍기 (예시: 해당 월 데이터 확인 필요)
+  // 캘린더 점 찍기
   const tileContent = ({ date, view }) => {
     if (view === "month") {
-      // todos에 해당 날짜가 있는지 확인 (단순 예시)
       const dateStr = format(date, "yyyy-MM-dd");
-      const hasTodo = todos.some((t) => t.date === dateStr);
+      const hasTodo = todos.some((t) => t.date && t.date.startsWith(dateStr));
       if (hasTodo) return <div className="dot"></div>;
     }
     return null;
   };
 
+  // [수정] 요일별 클래스 부여 (CSS nth-child 오류 해결)
+  const tileClassName = ({ date, view }) => {
+    if (view === "month") {
+      const day = date.getDay();
+      if (day === 0) return "sunday"; // 일요일
+      if (day === 6) return "saturday"; // 토요일
+    }
+    return null;
+  };
+
   // 진행률 계산
-  const totalTodos = todos.length;
-  const completedTodos = todos.filter((t) => t.isCompleted).length;
+  const totalTodos = filteredTodos.length;
+  const completedTodos = filteredTodos.filter((t) => t.is_completed).length;
   const progressPercentage =
     totalTodos === 0 ? 0 : Math.round((completedTodos / totalTodos) * 100);
 
@@ -113,7 +142,7 @@ const DashboardInner = () => {
           <h1>My Scheduler</h1>
         </div>
         <div className="user-info">
-          <span>{user?.name || "Guest"}님</span>
+          <span>{user?.name || "User"}님</span>
           <button className="btn-logout" onClick={logout}>
             로그아웃
           </button>
@@ -129,19 +158,25 @@ const DashboardInner = () => {
               value={selectedDate}
               formatDay={(locale, date) => format(date, "d")}
               tileContent={tileContent}
+              tileClassName={tileClassName} // [추가] 클래스네임 핸들러 연결
               minDetail="month"
               next2Label={null}
               prev2Label={null}
               showNeighboringMonth={false}
               locale="ko-KR"
+              calendarType="gregory" // 일요일 시작
             />
           </div>
 
           <div className="card status-card">
             <div className="status-header">
-              <h3>오늘의 진행률</h3>
+              <h3>
+                {filterMode === "daily" ? "오늘의 진행률" : "기간 진행률"}
+              </h3>
               <span className="date-badge">
-                {format(new Date(), "M월 d일")}
+                {filterMode === "daily"
+                  ? format(selectedDate, "M월 d일")
+                  : `${format(startDate, "M.d")}~${format(endDate, "M.d")}`}
               </span>
             </div>
             <div className="status-body">
@@ -178,22 +213,24 @@ const DashboardInner = () => {
         {/* [오른쪽] 투두 리스트 */}
         <div className="right-column">
           <div className="card todo-card">
-            {/* 헤더: 날짜/기간 제목 & 필터 버튼 */}
             <div className="todo-header">
               <div className="header-title">
                 <h2>
                   {filterMode === "custom" && startDate && endDate ? (
-                    // 기간 선택 모드일 때
                     <>
                       {format(startDate, "MM.dd")} ~ {format(endDate, "MM.dd")}
                       <span className="weekday"> 기간 일정</span>
                     </>
-                  ) : (
-                    // 일간/주간 모드일 때 (대표 날짜 표시)
+                  ) : filterMode === "weekly" ? (
                     <>
-                      {format(startDate || selectedDate, "MM월 dd일")}
+                      {format(startDate, "MM.dd")} ~ {format(endDate, "MM.dd")}
+                      <span className="weekday"> 주간 일정</span>
+                    </>
+                  ) : (
+                    <>
+                      {format(selectedDate, "MM월 dd일")}
                       <span className="weekday">
-                        {format(startDate || selectedDate, "EEEE", {
+                        {format(selectedDate, "EEEE", {
                           locale: ko,
                         })}
                       </span>
@@ -220,7 +257,6 @@ const DashboardInner = () => {
                   이번 주
                 </button>
 
-                {/* 기간 선택 (DatePicker) */}
                 <div
                   className="date-picker-wrapper"
                   onClick={() => setFilterMode("custom")}
@@ -231,8 +267,7 @@ const DashboardInner = () => {
                     endDate={endDate}
                     onChange={(update) => {
                       setDateRange(update);
-                      if (update[0] && !update[1]) setFilterMode("custom"); // 시작일만 찍어도 모드 변경
-                      if (update[0] && update[1]) setFilterMode("custom");
+                      if (update[0]) setFilterMode("custom");
                     }}
                     customInput={<CustomDateInput />}
                     dateFormat="yyyy.MM.dd"
@@ -245,21 +280,21 @@ const DashboardInner = () => {
 
             <div className="todo-body">
               <TodoList
-                todos={todos}
+                todos={filteredTodos}
                 categories={categories}
-                loading={loading}
+                loading={todoLoading}
                 onAdd={addTodo}
                 onToggle={toggleTodo}
                 onDelete={deleteTodo}
                 onUpdate={updateTodo}
                 onOpenCategoryManager={() => setIsCatModalOpen(true)}
+                currentDateStr={format(selectedDate, "yyyy-MM-dd")}
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* [카테고리 관리 모달] */}
       {isCatModalOpen && (
         <div className="modal-overlay" onClick={() => setIsCatModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -274,7 +309,9 @@ const DashboardInner = () => {
             </div>
             <CategoryManager
               categories={categories}
-              setCategories={setCategories}
+              onAdd={addCategory}
+              onUpdate={updateCategory}
+              onDelete={deleteCategory}
             />
           </div>
         </div>

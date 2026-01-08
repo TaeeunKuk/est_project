@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser"); // [추가]
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const todoRoutes = require("./routes/todoRoutes");
 
 dotenv.config();
 
@@ -24,6 +26,8 @@ app.use(express.json());
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/todos", todoRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

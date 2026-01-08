@@ -1,4 +1,4 @@
-// src/models/userModel.js
+// backend/src/models/userModel.js
 const pool = require("../config/db");
 
 // 이메일로 유저 찾기

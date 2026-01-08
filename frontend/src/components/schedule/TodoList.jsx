@@ -1,3 +1,4 @@
+// frontend/src/components/schedule/TodoList.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   FiCheckSquare,
@@ -22,21 +23,14 @@ const TodoList = ({
   onDelete,
   onUpdate,
   onOpenCategoryManager,
+  currentDateStr, // Dashboard에서 받은 "YYYY-MM-DD"
 }) => {
   // --- 상태 관리 ---
   const [newTodoTitle, setNewTodoTitle] = useState("");
-
-  // 새로운 할 일의 카테고리
   const [newTodoCatId, setNewTodoCatId] = useState(null);
-
-  // 드롭다운 열림 상태
   const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  // 리스트 필터링용 상태
   const [filterCatId, setFilterCatId] = useState("");
-
-  // 수정 모드 상태
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
 
@@ -55,7 +49,7 @@ const TodoList = ({
 
   const filteredTodos = (Array.isArray(todos) ? todos : []).filter((todo) => {
     if (!filterCatId) return true;
-    return todo.categoryId === Number(filterCatId);
+    return todo.category_id === Number(filterCatId);
   });
 
   const handleAdd = () => {
@@ -64,7 +58,14 @@ const TodoList = ({
       return;
     }
 
-    onAdd(newTodoTitle, newTodoCatId ? Number(newTodoCatId) : null);
+    // [수정] 12:00:00 꼼수 제거. 백엔드에서 to_char로 처리하므로 안전함.
+    // currentDateStr는 이미 "YYYY-MM-DD" 형식이므로 그대로 전송.
+    onAdd({
+      title: newTodoTitle,
+      categoryId: newTodoCatId ? Number(newTodoCatId) : null,
+      date: currentDateStr,
+      description: "",
+    });
 
     setNewTodoTitle("");
     setNewTodoCatId(null);
@@ -76,8 +77,13 @@ const TodoList = ({
     setEditTitle(todo.title);
   };
 
-  const saveEditing = (id) => {
-    onUpdate(id, editTitle);
+  const saveEditing = (todo) => {
+    onUpdate(todo.id, {
+      title: editTitle,
+      categoryId: todo.category_id,
+      date: todo.date, // 기존 날짜 유지
+      description: todo.description,
+    });
     setEditingId(null);
   };
 
@@ -86,7 +92,6 @@ const TodoList = ({
     setEditTitle("");
   };
 
-  // 현재 선택된 카테고리 객체
   const selectedCategory = categories.find((c) => c.id === newTodoCatId);
 
   return (
@@ -199,7 +204,7 @@ const TodoList = ({
               )}
             </div>
 
-            {/* [이동됨] 카테고리 관리 버튼 (드롭다운 뒤쪽) */}
+            {/* 카테고리 관리 버튼 */}
             <button
               className="btn-settings-inline"
               title="카테고리 관리"
@@ -219,25 +224,22 @@ const TodoList = ({
           <p className="empty-msg">
             {filterCatId
               ? "해당 카테고리의 일정이 없습니다."
-              : "일정이 없습니다."}
+              : "등록된 일정이 없습니다."}
           </p>
         ) : (
           <ul className="todo-items">
             {filteredTodos.map((todo) => {
               const matchedCat = categories.find(
-                (c) => c.id === todo.categoryId
+                (c) => c.id === todo.category_id
               );
 
               return (
                 <li
                   key={todo.id}
-                  className={`todo-item ${todo.isCompleted ? "done" : ""}`}
+                  className={`todo-item ${todo.is_completed ? "done" : ""}`}
                 >
-                  <div
-                    className="check-icon"
-                    onClick={() => onToggle(todo.id, todo.isCompleted)}
-                  >
-                    {todo.isCompleted ? (
+                  <div className="check-icon" onClick={() => onToggle(todo.id)}>
+                    {todo.is_completed ? (
                       <FiCheckSquare size={22} />
                     ) : (
                       <FiSquare size={22} />
@@ -265,7 +267,7 @@ const TodoList = ({
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
                         onKeyPress={(e) =>
-                          e.key === "Enter" && saveEditing(todo.id)
+                          e.key === "Enter" && saveEditing(todo)
                         }
                         autoFocus
                       />
@@ -279,7 +281,7 @@ const TodoList = ({
                       <>
                         <button
                           className="icon-btn save"
-                          onClick={() => saveEditing(todo.id)}
+                          onClick={() => saveEditing(todo)}
                         >
                           <FiSave />
                         </button>

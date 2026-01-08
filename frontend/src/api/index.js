@@ -1,3 +1,4 @@
+// frontend/src/api/index.js
 import axios from "axios";
 
 const apiClient = axios.create({

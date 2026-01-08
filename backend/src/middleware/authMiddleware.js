@@ -1,3 +1,4 @@
+// backend/src/middleware/authMiddleware.js
 const { verifyAccessToken } = require("../utils/tokenUtils");
 
 const verifyToken = (req, res, next) => {

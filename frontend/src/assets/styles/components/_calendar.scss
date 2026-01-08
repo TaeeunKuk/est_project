@@ -1,4 +1,4 @@
-/* frontend/src/assets/styles/components/_calendar.scss */
+// frontend/src/assets/styles/components/_calendar.scss
 @use "../variables" as v;
 @use "../mixins" as m;
 
@@ -44,10 +44,22 @@
           text-decoration: none;
           cursor: default;
         }
+
+        // [수정] 요일 헤더(일, 월, 화...)는 순서가 고정적이므로 nth-child 사용 가능
+        &__weekday {
+          // 일요일 헤더
+          &:nth-child(1) abbr {
+            color: v.$danger-color !important;
+          }
+          // 토요일 헤더
+          &:nth-child(7) abbr {
+            color: v.$primary-color !important;
+          }
+        }
       }
 
       &__tile {
-        height: 44px; // 높이 축소
+        height: 44px;
         @include m.flex-column;
         justify-content: flex-start;
         align-items: center;
@@ -55,24 +67,50 @@
         font-size: 0.9rem;
         border-radius: 8px;
         transition: 0.2s;
+        color: v.$text-main; // 기본 글자색
+
+        // [수정] JS tileClassName으로 주입된 클래스 사용
+        // 일요일 날짜
+        &.sunday {
+          color: v.$danger-color !important;
+        }
+        // 토요일 날짜
+        &.saturday {
+          color: v.$primary-color !important;
+        }
 
         &:enabled:hover {
           background: v.$primary-light;
-          color: v.$primary-color;
+          color: v.$primary-color !important;
         }
 
+        // 선택된 날짜 (활성화 상태) - 글자색 흰색으로 고정
         &--active {
           background: v.$primary-color !important;
           color: v.$white !important;
+
+          // 선택된 날짜의 주말 색상 덮어쓰기 위해 명시
+          &.sunday,
+          &.saturday {
+            color: v.$white !important;
+          }
+
           .dot {
             background-color: v.$white !important;
           }
         }
 
+        // 오늘 날짜
         &--now {
           background: v.$border-light;
-          color: v.$primary-hover;
           font-weight: 800;
+          // 오늘이 주말일 경우 색상 유지
+          &.sunday {
+            color: v.$danger-color !important;
+          }
+          &.saturday {
+            color: v.$primary-color !important;
+          }
         }
       }
 

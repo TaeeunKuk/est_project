@@ -1,4 +1,4 @@
-// src/services/userService.js
+// backend/src/services/userService.js
 const userModel = require("../models/userModel");
 
 // 회원가입, 로그인, 토큰 로직은 모두 authService.js로 이동했습니다.

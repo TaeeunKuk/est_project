@@ -1,4 +1,4 @@
-// src/services/authService.js
+// backend/src/services/authService.js
 const bcrypt = require("bcryptjs");
 const userModel = require("../models/userModel"); // DB 접근은 Model 사용
 const tokenUtils = require("../utils/tokenUtils"); // 토큰 생성은 Utils 사용

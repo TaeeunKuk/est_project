@@ -4,17 +4,19 @@ import "../../assets/styles/components/_calendar.scss";
 
 const getMonthMatrix = (year, month) => {
   const first = new Date(year, month, 1);
-  const startDay = first.getDay();
+  const startDay = first.getDay(); // 0(일) ~ 6(토)
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const matrix = [];
   let dayCounter = 1;
 
+  // 첫 번째 주
   let week = new Array(7).fill(null);
   for (let i = startDay; i < 7; i++) {
     week[i] = dayCounter++;
   }
   matrix.push(week);
 
+  // 나머지 주
   while (dayCounter <= daysInMonth) {
     week = new Array(7).fill(null);
     for (let i = 0; i < 7 && dayCounter <= daysInMonth; i++) {
@@ -44,6 +46,7 @@ const Calendar = ({ selectedDate, onSelectDate, todos = [] }) => {
 
   return (
     <div className="calendar-wrapper">
+      {/* 캘린더 헤더 */}
       <div
         style={{
           display: "flex",
@@ -82,16 +85,18 @@ const Calendar = ({ selectedDate, onSelectDate, todos = [] }) => {
         </div>
       </div>
 
+      {/* 요일 헤더 */}
       <div className="week-header">
-        <div>일</div>
+        <div style={{ color: "#e53e3e" }}>일</div>
         <div>월</div>
         <div>화</div>
         <div>수</div>
         <div>목</div>
         <div>금</div>
-        <div>토</div>
+        <div style={{ color: "#3182ce" }}>토</div>
       </div>
 
+      {/* 날짜 그리드 */}
       <div className="days-grid">
         {matrix.map((week, wi) =>
           (Array.isArray(week) ? week : new Array(7).fill(null)).map(
@@ -102,11 +107,20 @@ const Calendar = ({ selectedDate, onSelectDate, todos = [] }) => {
               const isSelected = cellDate === selectedDate;
               const hasTodo = cellDate ? todoDateSet.has(cellDate) : false;
 
+              // di=0(일요일), di=6(토요일) 색상 지정
+              let color = "inherit";
+              if (di === 0) color = "#e53e3e";
+              else if (di === 6) color = "#3182ce";
+
               return (
                 <div
                   key={`${wi}-${di}`}
                   className={`day-cell ${isSelected ? "selected" : ""}`}
                   onClick={() => d && onSelectDate && onSelectDate(cellDate)}
+                  style={{
+                    cursor: d ? "pointer" : "default",
+                    color: isSelected ? "#fff" : color, // 선택시 흰색 우선
+                  }}
                 >
                   <div>{d || ""}</div>
                   {hasTodo && <div className="todo-marker" />}

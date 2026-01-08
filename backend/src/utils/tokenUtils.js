@@ -1,4 +1,4 @@
-// src/utils/tokenUtils.js
+// backend/src/utils/tokenUtils.js
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
