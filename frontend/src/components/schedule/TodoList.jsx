@@ -1,4 +1,3 @@
-// frontend/src/components/schedule/TodoList.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   FiCheckSquare,
@@ -11,6 +10,7 @@ import {
   FiX,
   FiTag,
   FiChevronDown,
+  FiAlertCircle,
 } from "react-icons/fi";
 import "../../assets/styles/components/_todolist.scss";
 
@@ -23,9 +23,8 @@ const TodoList = ({
   onDelete,
   onUpdate,
   onOpenCategoryManager,
-  currentDateStr, // Dashboard에서 받은 "YYYY-MM-DD"
+  currentDateStr,
 }) => {
-  // --- 상태 관리 ---
   const [newTodoTitle, setNewTodoTitle] = useState("");
   const [newTodoCatId, setNewTodoCatId] = useState(null);
   const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
@@ -34,7 +33,9 @@ const TodoList = ({
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
 
-  // 외부 클릭 시 드롭다운 닫기
+  // 삭제 확인 모달 상태
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -45,28 +46,19 @@ const TodoList = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // --- 로직 ---
-
   const filteredTodos = (Array.isArray(todos) ? todos : []).filter((todo) => {
     if (!filterCatId) return true;
     return todo.category_id === Number(filterCatId);
   });
 
   const handleAdd = () => {
-    if (!newTodoTitle.trim()) {
-      alert("할 일을 입력해주세요.");
-      return;
-    }
-
-    // [수정] 12:00:00 꼼수 제거. 백엔드에서 to_char로 처리하므로 안전함.
-    // currentDateStr는 이미 "YYYY-MM-DD" 형식이므로 그대로 전송.
+    if (!newTodoTitle.trim()) return;
     onAdd({
       title: newTodoTitle,
       categoryId: newTodoCatId ? Number(newTodoCatId) : null,
       date: currentDateStr,
       description: "",
     });
-
     setNewTodoTitle("");
     setNewTodoCatId(null);
     setIsCatDropdownOpen(false);
@@ -81,7 +73,7 @@ const TodoList = ({
     onUpdate(todo.id, {
       title: editTitle,
       categoryId: todo.category_id,
-      date: todo.date, // 기존 날짜 유지
+      date: todo.date,
       description: todo.description,
     });
     setEditingId(null);
@@ -92,11 +84,20 @@ const TodoList = ({
     setEditTitle("");
   };
 
+  // 삭제 확인 핸들러
+  const requestDelete = (id) => {
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = () => {
+    onDelete(deleteConfirmId);
+    setDeleteConfirmId(null);
+  };
+
   const selectedCategory = categories.find((c) => c.id === newTodoCatId);
 
   return (
     <div className="todo-list-container">
-      {/* 1. 상단 필터 영역 */}
       <div className="top-control-bar">
         <select
           className="filter-select"
@@ -112,9 +113,7 @@ const TodoList = ({
         </select>
       </div>
 
-      {/* 2. 입력 및 속성 설정 영역 */}
       <div className="creation-card">
-        {/* (1) 텍스트 입력 */}
         <div className="input-row">
           <input
             type="text"
@@ -129,12 +128,9 @@ const TodoList = ({
           </button>
         </div>
 
-        {/* (2) 하단 속성 선택 */}
         <div className="options-row">
           <div className="option-group">
             <span className="label">분류:</span>
-
-            {/* 커스텀 드롭다운 */}
             <div className="custom-dropdown-container" ref={dropdownRef}>
               <button
                 className={`dropdown-trigger ${
@@ -203,8 +199,6 @@ const TodoList = ({
                 </ul>
               )}
             </div>
-
-            {/* 카테고리 관리 버튼 */}
             <button
               className="btn-settings-inline"
               title="카테고리 관리"
@@ -216,7 +210,6 @@ const TodoList = ({
         </div>
       </div>
 
-      {/* 3. 리스트 영역 */}
       <div className="list-scroll-area">
         {loading ? (
           <p className="status-msg">로딩 중...</p>
@@ -232,7 +225,6 @@ const TodoList = ({
               const matchedCat = categories.find(
                 (c) => c.id === todo.category_id
               );
-
               return (
                 <li
                   key={todo.id}
@@ -260,7 +252,6 @@ const TodoList = ({
                         </span>
                       </div>
                     )}
-
                     {editingId === todo.id ? (
                       <input
                         className="edit-input"
@@ -302,7 +293,7 @@ const TodoList = ({
                         </button>
                         <button
                           className="icon-btn delete"
-                          onClick={() => onDelete(todo.id)}
+                          onClick={() => requestDelete(todo.id)}
                         >
                           <FiTrash2 />
                         </button>
@@ -315,6 +306,30 @@ const TodoList = ({
           </ul>
         )}
       </div>
+
+      {/* 내부 커스텀 삭제 확인 모달 */}
+      {deleteConfirmId && (
+        <div className="mini-modal-overlay">
+          <div className="mini-modal">
+            <div className="icon-area">
+              <FiAlertCircle />
+            </div>
+            <h3>일정 삭제</h3>
+            <p>정말로 이 일정을 삭제하시겠습니까?</p>
+            <div className="modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                취소
+              </button>
+              <button className="btn-confirm" onClick={confirmDelete}>
+                삭제하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
