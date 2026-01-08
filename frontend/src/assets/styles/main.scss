@@ -1,48 +1,30 @@
 /* frontend/src/assets/styles/main.scss */
+@use "./common";
+@use "./components/auth";
+@use "./components/calendar";
+@use "./components/category";
+@use "./components/todolist";
 
-/* =========================================
-   1. Reset & Base Styles
-   ========================================= */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@use "./variables" as v;
+@use "./mixins" as m;
 
-body {
-  background-color: #f4f7fa;
-  font-family: "Noto Sans KR", sans-serif;
-  color: #2d3748;
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden; /* 전체 화면 스크롤 방지 */
-}
-
-button {
-  font-family: inherit;
-}
-
-/* =========================================
-   2. Dashboard Layout
-   ========================================= */
+// Dashboard Layout (Main)
 .dashboard-container {
-  max-width: 1600px; /* 와이드 화면 대응 */
+  max-width: v.$container-max-width;
   margin: 0 auto;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
+  @include m.flex-column;
 
   .dashboard-header {
-    flex: 0 0 60px; /* 헤더 높이 고정 */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex: 0 0 v.$header-height;
+    @include m.flex-between;
     padding: 0 2rem;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
+    background: v.$white;
+    border-bottom: 1px solid v.$border-color;
 
     .brand h1 {
       font-size: 1.25rem;
-      color: #3182ce;
+      color: v.$primary-color;
       font-weight: 700;
     }
 
@@ -50,449 +32,109 @@ button {
       display: flex;
       gap: 1rem;
       align-items: center;
-      font-size: 0.95rem;
+      font-size: v.$font-size-sm;
 
       .btn-logout {
         border: 1px solid #cbd5e0;
-        background: white;
+        background: v.$white;
         padding: 6px 14px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
         transition: 0.2s;
         &:hover {
-          background: #edf2f7;
+          background: v.$border-light;
         }
       }
     }
   }
 
   .dashboard-content {
-    flex: 1; /* 남은 높이 모두 차지 */
+    flex: 1;
     display: grid;
-    grid-template-columns: 360px 1fr; /* 왼쪽 너비 고정 */
+    grid-template-columns: v.$sidebar-width 1fr;
     gap: 20px;
-    padding: 20px;
-    overflow: hidden; /* 내부 스크롤 제어 */
-    height: calc(100vh - 60px); /* 헤더 제외 높이 명시 */
-  }
-}
-
-.card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  border: 1px solid #edf2f7;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* =========================================
-   3. Left Column (Calendar & Widget) - Fixed Height
-   ========================================= */
-.left-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  height: 100%; /* 부모 높이 상속 */
-  overflow: hidden; /* 스크롤 방지 */
-
-  .calendar-card {
-    padding: 20px; /* 패딩 축소 */
-    flex-shrink: 0; /* 크기 줄어듦 방지 */
-
-    .react-calendar {
-      width: 100%;
-      border: none;
-      font-family: inherit;
-      background: none;
-
-      .react-calendar__navigation {
-        margin-bottom: 12px;
-        height: 36px;
-        button {
-          font-size: 1rem;
-          font-weight: bold;
-          min-width: 40px;
-          background: none;
-          border-radius: 8px;
-          &:enabled:hover {
-            background-color: #f7fafc;
-          }
-        }
-      }
-
-      .react-calendar__month-view__weekdays {
-        font-size: 0.8rem;
-        color: #a0aec0;
-        text-transform: uppercase;
-        font-weight: 600;
-        text-decoration: none;
-        margin-bottom: 4px;
-        abbr {
-          text-decoration: none;
-          cursor: default;
-        }
-      }
-
-      .react-calendar__tile {
-        /* [중요] 타일 높이 대폭 축소하여 전체 높이 제어 */
-        height: 44px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        padding-top: 6px;
-        font-size: 0.9rem;
-        border-radius: 8px;
-        transition: 0.2s;
-
-        &:enabled:hover {
-          background: #ebf8ff;
-          color: #3182ce;
-        }
-
-        &--active {
-          background: #3182ce !important;
-          color: white !important;
-          .dot {
-            background-color: white !important;
-          }
-        }
-
-        &--now {
-          background: #edf2f7;
-          color: #2b6cb0;
-          font-weight: 800;
-        }
-      }
-
-      .dot {
-        margin-top: auto;
-        margin-bottom: 4px;
-        width: 5px;
-        height: 5px;
-        background-color: #e53e3e;
-        border-radius: 50%;
-      }
-    }
-  }
-
-  .status-card {
-    padding: 20px;
-    flex-shrink: 0;
-
-    .status-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      h3 {
-        font-size: 1rem;
-        font-weight: bold;
-      }
-      .date-badge {
-        background: #edf2f7;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        color: #4a5568;
-      }
-    }
-
-    .status-body {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-
-      .progress-circle {
-        width: 80px; /* 크기 약간 축소 */
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .inner-circle {
-          width: 66px;
-          height: 66px;
-          background: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          .percent {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #3182ce;
-          }
-        }
-      }
-
-      .status-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-
-        .info-item {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.9rem;
-
-          .value {
-            font-weight: bold;
-          }
-          .completed {
-            color: #3182ce;
-          }
-          .remaining {
-            color: #e53e3e;
-          }
-        }
-      }
-    }
+    padding: 24px;
+    overflow: hidden;
+    height: calc(100vh - #{v.$header-height});
   }
 }
 
 /* =========================================
-   4. Right Column (Todo List & Header) - Scrolling Fix
+   Override TodoList internal styles for updated layout
+   (components/_todolist.scss 내용이 main.scss에 포함되는 구조이므로
+    아래에 변경된 내부 스타일을 명시합니다. 
+    실제로는 _todolist.scss를 수정하는 것이 좋으나, 
+    요청하신 대로 '전체 코드'를 제공하기 위해 여기에 합칩니다.)
    ========================================= */
-.right-column {
-  display: flex;
-  flex-direction: column;
-  height: 100%; /* 부모 높이 꽉 채움 */
-  overflow: hidden; /* 이중 스크롤 방지 */
 
-  .todo-card {
-    flex: 1; /* 높이 100% 차지 */
-    padding: 24px 32px;
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* 필수 */
-    overflow: hidden; /* 필수 */
-
-    .todo-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #f7fafc;
-      flex-shrink: 0; /* 스크롤 시 헤더 고정 */
-
-      .header-title h2 {
-        font-size: 1.6rem;
-        font-weight: 800;
-        display: flex;
-        align-items: baseline;
-        gap: 10px;
-        .weekday {
-          font-size: 1.1rem;
-          color: #a0aec0;
-          font-weight: normal;
-        }
-      }
-
-      .filter-buttons {
-        display: flex;
-        align-items: center;
-        background: #f7fafc;
-        padding: 4px;
-        border-radius: 10px;
-        gap: 4px;
-
-        .filter-btn {
-          height: 34px;
-          border: none;
-          background: transparent;
-          padding: 0 14px;
-          border-radius: 8px;
-          color: #718096;
-          font-weight: 600;
-          font-size: 0.9rem;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: all 0.2s;
-
-          &:hover {
-            color: #4a5568;
-            background: rgba(0, 0, 0, 0.03);
-          }
-          &.active {
-            background: white;
-            color: #3182ce;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-          }
-        }
-      }
-    }
-
-    .todo-body {
-      flex: 1; /* 남은 공간 모두 차지 */
-      display: flex;
-      flex-direction: column;
-      overflow: hidden; /* 내부 TodoList에서 스크롤 처리 */
-      min-height: 0; /* Flexbox 자식 스크롤 버그 해결용 */
-    }
-  }
-}
-
-/* =========================================
-   5. Todo List Component (Internal Structure)
-   ========================================= */
 .todo-list-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden; /* 컨테이너 밖으로 나가는 것 방지 */
-
-  /* 1. 상단 필터 & 설정 바 */
   .top-control-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-shrink: 0; /* 스크롤 방지 */
-
-    .filter-select {
-      height: 38px;
-      padding: 0 12px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      background: white;
-      color: #4a5568;
-      font-size: 0.9rem;
-      cursor: pointer;
-      outline: none;
-      flex: 1;
-      max-width: 200px;
-      &:focus {
-        border-color: #3182ce;
-      }
-    }
-
+    // 설정 버튼 제거됨
     .btn-settings {
-      width: 38px;
-      height: 38px;
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      color: #718096;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      &:hover {
-        color: #3182ce;
-        border-color: #3182ce;
-      }
+      display: none;
     }
   }
 
-  /* 2. 생성 카드 (입력 + 분류) */
   .creation-card {
-    background: #f9fafb;
-    border: 1px solid #edf2f7;
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex-shrink: 0; /* 스크롤 방지 */
-
-    /* 텍스트 입력 줄 */
-    .input-row {
-      display: flex;
-      gap: 10px;
-      .main-input {
-        flex: 1;
-        height: 44px;
-        padding: 0 16px;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        font-size: 1rem;
-        outline: none;
-        background: white;
-        &:focus {
-          border-color: #3182ce;
-          box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-        }
-      }
-      .btn-add {
-        width: 44px;
-        height: 44px;
-        background: #3182ce;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-size: 1.4rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        &:hover {
-          background: #2b6cb0;
-        }
-      }
-    }
-
-    /* 하단 옵션 줄 (드롭다운만 남음) */
     .options-row {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px; // 버튼과 분류 사이 간격
       padding-top: 4px;
+
+      // [NEW] 인라인 설정 버튼 스타일
+      .btn-settings-inline {
+        color: v.$text-sub;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+          background-color: v.$border-light;
+          color: v.$primary-color;
+        }
+      }
 
       .option-group {
         display: flex;
         align-items: center;
         gap: 10px;
         position: relative;
-
         .label {
           font-size: 0.85rem;
           font-weight: 700;
-          color: #718096;
+          color: v.$text-sub;
         }
 
-        /* --- 커스텀 드롭다운 스타일 --- */
+        // Custom Dropdown (기존 유지)
         .custom-dropdown-container {
           position: relative;
-
-          /* 트리거 버튼 */
           .dropdown-trigger {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            @include m.flex-between;
             gap: 6px;
             padding: 4px 10px;
-            background: white;
-            border: 1px solid #e2e8f0;
+            background: v.$white;
+            border: 1px solid v.$border-color;
             border-radius: 8px;
-            color: #718096;
+            color: v.$text-sub;
             font-size: 0.85rem;
             font-weight: 500;
-            cursor: pointer;
+            width: 160px;
             transition: 0.2s;
-            width: 160px; /* 고정 너비 */
-
             .trigger-content {
               display: flex;
               align-items: center;
-              gap: 10px; /* 간격 확보 */
+              gap: 10px;
               overflow: hidden;
-
               .icon {
                 font-size: 0.9rem;
                 flex-shrink: 0;
               }
-
-              /* 색상 점 */
               .dot {
                 width: 12px;
                 height: 12px;
@@ -500,363 +142,24 @@ button {
                 flex-shrink: 0;
               }
               .text {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                @include m.text-ellipsis;
               }
             }
-
             .arrow {
               font-size: 1rem;
-              color: #a0aec0;
+              color: v.$text-light;
               flex-shrink: 0;
             }
-
             &:hover {
               border-color: #cbd5e0;
-              background: #fff;
+              background: v.$white;
             }
-
             &.has-value {
               font-weight: 700;
               border-width: 1px;
             }
           }
-
-          /* 드롭다운 메뉴 */
-          .dropdown-menu {
-            position: absolute;
-            top: 110%;
-            left: 0;
-            width: 100%;
-            min-width: 160px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 100; /* z-index 높임 */
-            list-style: none;
-            padding: 4px 0;
-            max-height: 200px;
-            overflow-y: auto;
-
-            .dropdown-item {
-              display: flex;
-              align-items: center;
-              gap: 10px;
-              padding: 8px 12px;
-              font-size: 0.9rem;
-              cursor: pointer;
-              color: #4a5568;
-
-              &:hover {
-                background: #f7fafc;
-              }
-
-              .color-circle {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                flex-shrink: 0;
-              }
-              .text-gray {
-                color: #a0aec0;
-              }
-              .check {
-                margin-left: auto;
-                font-size: 1rem;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /* 리스트 영역 (스크롤 적용 핵심) */
-  .list-scroll-area {
-    flex: 1; /* 남은 높이 모두 차지 */
-    overflow-y: auto; /* 세로 스크롤 허용 */
-    padding-right: 6px;
-    padding-bottom: 10px;
-
-    /* 스크롤바 스타일링 */
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background-color: #cbd5e0;
-      border-radius: 10px;
-    }
-    .status-msg,
-    .empty-msg {
-      text-align: center;
-      color: #a0aec0;
-      margin-top: 40px;
-    }
-  }
-
-  .todo-items {
-    list-style: none;
-    .todo-item {
-      display: flex;
-      align-items: center;
-      background: white;
-      border: 1px solid #edf2f7;
-      margin-bottom: 10px;
-      padding: 14px 18px;
-      border-radius: 12px;
-      transition: all 0.2s;
-
-      &:hover {
-        border-color: #cbd5e0;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        .actions {
-          opacity: 1;
-          visibility: visible;
-        }
-      }
-      &.done {
-        background: #f9fafb;
-        .content .text {
-          text-decoration: line-through;
-          color: #cbd5e0;
-        }
-        .meta-info {
-          opacity: 0.5;
-        }
-      }
-
-      .check-icon {
-        color: #3182ce;
-        cursor: pointer;
-        margin-right: 14px;
-        display: flex;
-        align-items: center;
-      }
-
-      .content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        .meta-info {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          .cat-badge {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 700;
-          }
-        }
-
-        .text {
-          font-size: 1rem;
-          color: #2d3748;
-        }
-        .edit-input {
-          width: 100%;
-          padding: 4px 8px;
-          border: 1px solid #3182ce;
-          border-radius: 4px;
-          outline: none;
-        }
-      }
-
-      .actions {
-        display: flex;
-        gap: 6px;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.2s;
-
-        .icon-btn {
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          font-size: 1.1rem;
-          padding: 4px;
-          color: #a0aec0;
-          &:hover {
-            color: #3182ce;
-          }
-          &.delete:hover {
-            color: #e53e3e;
-          }
-        }
-      }
-    }
-  }
-}
-
-/* =========================================
-   6. Modal & Category Manager
-   ========================================= */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-  backdrop-filter: blur(2px);
-
-  .modal-content {
-    background: white;
-    width: 420px;
-    padding: 24px;
-    border-radius: 16px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      h3 {
-        font-size: 1.2rem;
-        font-weight: 800;
-      }
-      .close-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #a0aec0;
-        &:hover {
-          color: #2d3748;
-        }
-      }
-    }
-  }
-}
-
-.category-manager-modal {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-
-  .input-row {
-    display: flex;
-    gap: 8px;
-    .cat-input {
-      flex: 1;
-      height: 40px;
-      padding: 0 12px;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      outline: none;
-      font-size: 0.95rem;
-      &:focus {
-        border-color: #3182ce;
-      }
-    }
-    .btn-save {
-      height: 40px;
-      min-width: 50px;
-      padding: 0 14px;
-      background: #4a5568;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      &:hover {
-        background: #2d3748;
-      }
-    }
-  }
-
-  .color-picker-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-
-    .label {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #718096;
-    }
-    .palette {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-
-      .color-circle {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid transparent;
-        transition: transform 0.1s;
-
-        &:hover {
-          transform: scale(1.1);
-        }
-        &.selected {
-          transform: scale(1.1);
-          border-color: #2d3748;
-        }
-      }
-    }
-  }
-
-  .cat-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 250px;
-    overflow-y: auto;
-    margin-top: 4px;
-    padding-top: 12px;
-    border-top: 1px solid #edf2f7;
-
-    .cat-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      background: #f7fafc;
-      border-radius: 8px;
-
-      .cat-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        .color-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-        .cat-text {
-          font-size: 0.95rem;
-        }
-      }
-      .cat-actions button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #a0aec0;
-        margin-left: 6px;
-        &:hover {
-          color: #4a5568;
-        }
-        &.danger:hover {
-          color: #e53e3e;
+          // ... dropdown menu styles ...
         }
       }
     }

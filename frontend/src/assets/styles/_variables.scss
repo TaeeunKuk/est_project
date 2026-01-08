@@ -1,24 +1,33 @@
-// 색상
-$primary: #3182ce;
+/* frontend/src/assets/styles/_variables.scss */
+
+// Colors - Theme
+$primary-color: #3182ce;
 $primary-hover: #2b6cb0;
-$primary-color: #0d6efd;
-$danger: #e53e3e;
+$primary-light: #ebf8ff;
+
+// Colors - Status
+$success-color: #38a169;
+$danger-color: #e53e3e;
+$warning-color: #d69e2e;
+
+// Colors - Grayscale
+$bg-color: #f4f7fa;
 $white: #ffffff;
-
-$gray-100: #f7fafc;
-$gray-200: #edf2f7;
-$gray-300: #e2e8f0;
-$gray-400: #cbd5e0;
-$gray-600: #718096;
-
 $text-main: #2d3748;
-$text-sub: #4a5568;
+$text-sub: #718096;
+$text-light: #a0aec0;
+$border-color: #e2e8f0;
+$border-light: #edf2f7;
 
-// 레이아웃
-$radius: 8px;
-$shadow: 0 1px 3px rgba(0,0,0,0.1);
-$border-color: #e0e0e0;
+// Spacing & Layout
+$header-height: 64px;
+$sidebar-width: 360px;
+$container-max-width: 1600px;
+$card-radius: 16px;
+$input-radius: 8px;
 
-// 브레이크포인트
-$breakpoint-mobile: 480px;
-$breakpoint-tablet: 768px;
+// Fonts
+$font-family-base: "Noto Sans KR", sans-serif;
+$font-size-base: 1rem;
+$font-size-sm: 0.9rem;
+$font-size-xs: 0.8rem;

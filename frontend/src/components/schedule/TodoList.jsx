@@ -26,7 +26,7 @@ const TodoList = ({
   // --- 상태 관리 ---
   const [newTodoTitle, setNewTodoTitle] = useState("");
 
-  // 새로운 할 일의 카테고리 (날짜 로직 삭제됨)
+  // 새로운 할 일의 카테고리
   const [newTodoCatId, setNewTodoCatId] = useState(null);
 
   // 드롭다운 열림 상태
@@ -64,7 +64,6 @@ const TodoList = ({
       return;
     }
 
-    // 기간 관련 인자 제거됨
     onAdd(newTodoTitle, newTodoCatId ? Number(newTodoCatId) : null);
 
     setNewTodoTitle("");
@@ -92,7 +91,7 @@ const TodoList = ({
 
   return (
     <div className="todo-list-container">
-      {/* 1. 상단 필터 & 설정 영역 */}
+      {/* 1. 상단 필터 영역 */}
       <div className="top-control-bar">
         <select
           className="filter-select"
@@ -106,13 +105,6 @@ const TodoList = ({
             </option>
           ))}
         </select>
-        <button
-          className="btn-settings"
-          title="카테고리 관리"
-          onClick={onOpenCategoryManager}
-        >
-          <FiSettings />
-        </button>
       </div>
 
       {/* 2. 입력 및 속성 설정 영역 */}
@@ -132,7 +124,7 @@ const TodoList = ({
           </button>
         </div>
 
-        {/* (2) 하단 속성 선택 (드롭다운만 남음) */}
+        {/* (2) 하단 속성 선택 */}
         <div className="options-row">
           <div className="option-group">
             <span className="label">분류:</span>
@@ -206,6 +198,15 @@ const TodoList = ({
                 </ul>
               )}
             </div>
+
+            {/* [이동됨] 카테고리 관리 버튼 (드롭다운 뒤쪽) */}
+            <button
+              className="btn-settings-inline"
+              title="카테고리 관리"
+              onClick={onOpenCategoryManager}
+            >
+              <FiSettings />
+            </button>
           </div>
         </div>
       </div>
@@ -244,7 +245,6 @@ const TodoList = ({
                   </div>
 
                   <div className="content">
-                    {/* 카테고리 정보만 표시 (기간 삭제됨) */}
                     {matchedCat && (
                       <div className="meta-info">
                         <span

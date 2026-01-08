@@ -1,64 +1,134 @@
-// src/assets/styles/components/_category.scss
+/* frontend/src/assets/styles/components/_category.scss */
+@use "../variables" as v;
+@use "../mixins" as m;
 
-@use '../variables' as *;
-@use '../mixins' as *;
+.modal-content {
+  background: v.$white;
+  width: 420px;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 
-.category-manager {
-  background: $white;
-  padding: 20px;
-  border-radius: $radius;
-  box-shadow: $shadow;
-  margin-bottom: 20px;
-
-  h3 {
-    margin: 0 0 15px 0;
-    font-size: 1.1rem;
-    color: $text-main;
+  .modal-header {
+    @include m.flex-between;
+    margin-bottom: 20px;
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+    .close-btn {
+      color: v.$text-light;
+      &:hover {
+        color: v.$text-main;
+      }
+    }
   }
+}
 
-  .cat-input-group {
+.category-manager-modal {
+  @include m.flex-column;
+  gap: 16px;
+
+  .input-row {
     display: flex;
     gap: 8px;
-    margin-bottom: 15px;
-
-    input {
+    .cat-input {
       flex: 1;
-      padding: 8px;
-      border: 1px solid $gray-300;
-      border-radius: $radius;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid v.$border-color;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.95rem;
+      &:focus {
+        border-color: v.$primary-color;
+      }
+    }
+    .btn-save {
+      height: 40px;
+      min-width: 50px;
+      padding: 0 14px;
+      background: #4a5568;
+      color: v.$white;
+      border-radius: 8px;
+      font-weight: 600;
+      @include m.flex-center;
+      &:hover {
+        background: v.$text-main;
+      }
+    }
+  }
+
+  .color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    .label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: v.$text-sub;
+    }
+    .palette {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      .color-circle {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        cursor: pointer;
+        @include m.flex-center;
+        border: 2px solid transparent;
+        transition: transform 0.1s;
+        &:hover {
+          transform: scale(1.1);
+        }
+        &.selected {
+          transform: scale(1.1);
+          border-color: v.$text-main;
+        }
+      }
     }
   }
 
   .cat-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    @include m.flex-column;
+    gap: 6px;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid v.$border-light;
+    @include m.custom-scrollbar;
 
-    .cat-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      background-color: $gray-100;
-      font-size: 0.9rem;
-      border: 1px solid $gray-200;
-
-      .color-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
+    .cat-item {
+      @include m.flex-between;
+      padding: 8px 12px;
+      background: #f7fafc;
+      border-radius: 8px;
+      .cat-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        .color-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        .cat-text {
+          font-size: 0.95rem;
+        }
       }
-
-      .btn-del-cat {
-        background: none;
-        border: none;
-        color: $gray-600;
-        cursor: pointer;
-        font-weight: bold;
-        margin-left: 4px;
+      .cat-actions button {
+        color: v.$text-light;
+        margin-left: 6px;
+        &:hover {
+          color: #4a5568;
+        }
+        &.danger:hover {
+          color: v.$danger-color;
+        }
       }
     }
   }

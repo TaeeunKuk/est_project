@@ -1,90 +1,71 @@
-// src/assets/styles/components/_auth.scss
-
-@use '../variables' as *;
-@use '../mixins' as *;
+/* frontend/src/assets/styles/components/_auth.scss */
+@use "../variables" as v;
+@use "../mixins" as m;
 
 .auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
-  background-color: $gray-100;
+  @include m.flex-center;
+  background-color: v.$bg-color;
+  overflow-y: auto; // 내용이 많을 때 스크롤 허용
+}
 
-  .auth-card {
-    background: $white;
-    padding: 2.5rem;
-    border-radius: $radius;
-    box-shadow: $shadow;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+.auth-card {
+  @include m.card-style;
+  width: 100%;
+  max-width: 400px;
+  padding: 48px 40px;
+  text-align: center;
 
-    h2 {
-      margin-bottom: 1.5rem;
-      color: $text-main;
+  .brand {
+    margin-bottom: 32px;
+    h1 {
       font-size: 1.5rem;
+      color: v.$primary-color;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
+  }
 
-    .auth-form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+  h2 {
+    font-size: 1.1rem;
+    color: v.$text-main;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
 
-      input {
-        padding: 12px;
-        border: 1px solid $gray-300;
-        border-radius: $radius;
-        font-size: 1rem;
-        transition: border-color 0.2s;
+  .error-msg {
+    color: v.$danger-color;
+    background-color: #fff5f5;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    border: 1px solid #fed7d7;
+  }
 
-        &:focus {
-          outline: none;
-          border-color: $primary;
-        }
-      }
+  .auth-form {
+    @include m.flex-column;
+    gap: 16px;
 
-      button {
-        padding: 12px;
-        background-color: $primary;
-        color: $white;
-        border: none;
-        border-radius: $radius;
-        font-size: 1rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.2s;
-
-        &:hover {
-          background-color: $primary-hover;
-        }
-
-        &:disabled {
-          background-color: $gray-400;
-          cursor: not-allowed;
-        }
-      }
+    // 공통 입력창 스타일은 _common.scss에서 상속받거나 직접 사용
+    // 여기서는 버튼 마진만 추가
+    button {
+      margin-top: 8px;
     }
+  }
 
-    .auth-footer {
-      margin-top: 1.5rem;
-      font-size: 0.9rem;
-      color: $gray-600;
+  .auth-footer {
+    margin-top: 32px;
+    font-size: 0.9rem;
+    color: v.$text-sub;
 
-      a {
-        color: $primary;
-        text-decoration: none;
-        font-weight: bold;
-        margin-left: 5px;
-
-        &:hover { text-decoration: underline; }
+    a {
+      color: v.$primary-color;
+      font-weight: 600;
+      margin-left: 6px;
+      &:hover {
+        text-decoration: underline;
       }
-    }
-
-    .error-msg {
-      color: $danger;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-      text-align: left;
     }
   }
 }

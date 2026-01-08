@@ -1,0 +1,81 @@
+/* frontend/src/assets/styles/_common.scss */
+@use "./variables" as v;
+@use "./mixins" as m;
+
+// 1. Reset & Base
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: v.$bg-color;
+  font-family: v.$font-family-base;
+  color: v.$text-main;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+ul,
+li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+// 2. Common Components
+
+// 카드 (컨테이너)
+.card {
+  @include m.card-style;
+  @include m.flex-column;
+}
+
+// 공통 입력창 스타일
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid v.$border-color;
+  border-radius: v.$input-radius;
+  font-size: v.$font-size-base;
+  outline: none;
+  background-color: v.$white;
+  transition: all 0.2s;
+
+  &:focus {
+    border-color: v.$primary-color;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  }
+  &::placeholder {
+    color: v.$text-light;
+  }
+}
+
+// 모달 오버레이 공통
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  @include m.flex-center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+}

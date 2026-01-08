@@ -1,25 +1,49 @@
-// src/assets/styles/_mixins.scss
+/* frontend/src/assets/styles/_mixins.scss */
 
-@use 'variables' as vars;
-
-// 1. Flexbox 정렬 자동화
-@mixin flex-box($justify: center, $align: center, $direction: row) {
+// Flexbox 정렬
+@mixin flex-center {
   display: flex;
-  justify-content: $justify;
-  align-items: $align;
-  flex-direction: $direction;
+  align-items: center;
+  justify-content: center;
 }
 
-// 2. 반응형 미디어 쿼리 (Mobile)
-@mixin mobile {
-  @media (max-width: #{vars.$breakpoint-mobile}) {
-    @content;
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// 텍스트 말줄임표
+@mixin text-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// 커스텀 스크롤바
+@mixin custom-scrollbar($width: 6px) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
   }
 }
 
-// 3. 반응형 미디어 쿼리 (Tablet)
-@mixin tablet {
-  @media (max-width: #{vars.$breakpoint-tablet}) {
-    @content;
-  }
+// 공통 카드 스타일
+@mixin card-style {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #edf2f7;
+  overflow: hidden;
 }

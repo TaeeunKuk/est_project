@@ -1,108 +1,155 @@
-@use "../variables" as *;
-@use "../mixins" as *;
+/* frontend/src/assets/styles/components/_calendar.scss */
+@use "../variables" as v;
+@use "../mixins" as m;
 
-// React Calendar 커스텀 스타일
-.react-calendar {
-  width: 100%;
-  background: $white;
-  border: none;
-  font-family: inherit;
-  line-height: 1.125em;
-  padding: 20px;
-  border-radius: $radius;
-  box-shadow: $shadow;
+.left-column {
+  @include m.flex-column;
+  gap: 16px;
+  height: 100%;
+  overflow: hidden;
 
-  &--doubleView {
-    width: 700px;
-  }
+  .calendar-card {
+    padding: 20px;
+    flex-shrink: 0;
 
-  &__navigation {
-    display: flex;
-    height: 44px;
-    margin-bottom: 1em;
-
-    button {
-      min-width: 44px;
-      background: none;
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: $text-main;
+    .react-calendar {
+      width: 100%;
       border: none;
-      border-radius: $radius;
-      cursor: pointer;
+      font-family: inherit;
+      background: none;
 
-      &:enabled:hover,
-      &:enabled:focus {
-        background-color: $gray-100;
+      &__navigation {
+        margin-bottom: 12px;
+        height: 36px;
+        button {
+          font-size: 1rem;
+          font-weight: bold;
+          min-width: 40px;
+          background: none;
+          border-radius: v.$input-radius;
+          &:enabled:hover {
+            background-color: #f7fafc;
+          }
+        }
       }
-    }
-  }
 
-  &__month-view__weekdays {
-    text-align: center;
-    text-transform: uppercase;
-    font-weight: bold;
-    font-size: 0.9em;
-    color: $gray-600;
-    margin-bottom: 10px;
+      &__month-view__weekdays {
+        font-size: 0.8rem;
+        color: v.$text-light;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 4px;
+        abbr {
+          text-decoration: none;
+          cursor: default;
+        }
+      }
 
-    abbr {
-      text-decoration: none;
-      cursor: default;
-    }
-  }
+      &__tile {
+        height: 44px; // 높이 축소
+        @include m.flex-column;
+        justify-content: flex-start;
+        align-items: center;
+        padding-top: 6px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        transition: 0.2s;
 
-  &__tile {
-    max-width: 100%;
-    padding: 10px 6.6667px;
-    background: none;
-    text-align: center;
-    line-height: 16px;
-    height: 80px; // 셀 높이 키움
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    border-radius: $radius;
-    transition: 0.2s;
-    font-size: 1rem;
-    color: $text-main;
+        &:enabled:hover {
+          background: v.$primary-light;
+          color: v.$primary-color;
+        }
 
-    &:enabled:hover,
-    &:enabled:focus {
-      background-color: $gray-100;
-      color: $primary;
-    }
+        &--active {
+          background: v.$primary-color !important;
+          color: v.$white !important;
+          .dot {
+            background-color: v.$white !important;
+          }
+        }
 
-    &--now {
-      background: #ffff76;
-      color: black;
-      font-weight: bold;
-    }
-
-    &--active {
-      background: $primary !important;
-      color: white !important;
+        &--now {
+          background: v.$border-light;
+          color: v.$primary-hover;
+          font-weight: 800;
+        }
+      }
 
       .dot {
-        background-color: white !important;
+        margin-top: auto;
+        margin-bottom: 4px;
+        width: 5px;
+        height: 5px;
+        background-color: v.$danger-color;
+        border-radius: 50%;
       }
     }
   }
 
-  // 투두가 있는 날짜 표시용 점
-  .dot-container {
-    display: flex;
-    gap: 2px;
-    margin-top: 4px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+  .status-card {
+    padding: 20px;
+    flex-shrink: 0;
 
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: $primary;
+    .status-header {
+      @include m.flex-between;
+      margin-bottom: 16px;
+      h3 {
+        font-size: 1rem;
+        font-weight: bold;
+      }
+      .date-badge {
+        background: v.$border-light;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        color: v.$text-main;
+      }
+    }
+
+    .status-body {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .progress-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        @include m.flex-center;
+
+        .inner-circle {
+          width: 66px;
+          height: 66px;
+          background: v.$white;
+          border-radius: 50%;
+          @include m.flex-center;
+          .percent {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: v.$primary-color;
+          }
+        }
+      }
+
+      .status-info {
+        flex: 1;
+        @include m.flex-column;
+        gap: 6px;
+        .info-item {
+          @include m.flex-between;
+          font-size: 0.9rem;
+          .value {
+            font-weight: bold;
+          }
+          .completed {
+            color: v.$primary-color;
+          }
+          .remaining {
+            color: v.$danger-color;
+          }
+        }
+      }
+    }
   }
 }
