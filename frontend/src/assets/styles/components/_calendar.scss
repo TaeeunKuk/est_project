@@ -11,6 +11,8 @@
   .calendar-card {
     padding: 20px;
     flex-shrink: 0;
+    // 캘린더 카드 자체의 최소 높이를 확보하여 레이아웃 흔들림 방지
+    min-height: 390px;
 
     .react-calendar {
       width: 100%;
