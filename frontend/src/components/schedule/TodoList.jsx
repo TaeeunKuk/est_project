@@ -1,3 +1,4 @@
+// frontend/src/components/schedule/TodoList.jsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   FiCheckSquare,
@@ -29,9 +30,9 @@ const TodoList = ({
   const [newTodoTitle, setNewTodoTitle] = useState("");
   const [newTodoCatId, setNewTodoCatId] = useState(null);
   const [isCatDropdownOpen, setIsCatDropdownOpen] = useState(false);
-  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false); // 필터 드롭다운 상태
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const filterRef = useRef(null); // 필터 참조
+  const filterRef = useRef(null);
   const [filterCatId, setFilterCatId] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
@@ -98,7 +99,7 @@ const TodoList = ({
 
   return (
     <div className="todo-list-container">
-      {/* 1. 상단 필터 영역 (커스텀 드롭다운 적용) */}
+      {/* 1. 상단 필터 영역 */}
       <div className="top-control-bar">
         <div
           className="custom-dropdown-container filter-dropdown"
@@ -274,26 +275,26 @@ const TodoList = ({
                 >
                   <div className="check-icon" onClick={() => onToggle(todo.id)}>
                     {todo.is_completed ? (
-                      <FiCheckSquare size={22} />
+                      <FiCheckSquare size={20} />
                     ) : (
-                      <FiSquare size={22} />
+                      <FiSquare size={20} />
                     )}
                   </div>
 
                   <div className="content">
                     {matchedCat && (
-                      <div className="meta-info">
-                        <span
-                          className="cat-badge"
-                          style={{
-                            backgroundColor: matchedCat.color + "20",
-                            color: matchedCat.color,
-                          }}
-                        >
-                          {matchedCat.name}
-                        </span>
-                      </div>
+                      <span
+                        className="cat-badge-inline"
+                        style={{
+                          backgroundColor: matchedCat.color + "15",
+                          color: matchedCat.color,
+                          borderColor: matchedCat.color + "40",
+                        }}
+                      >
+                        {matchedCat.name}
+                      </span>
                     )}
+
                     {editingId === todo.id ? (
                       <input
                         className="edit-input"
