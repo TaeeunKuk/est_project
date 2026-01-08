@@ -1,10 +1,17 @@
 import React, { useState } from "react";
-import { FiEdit2, FiTrash2, FiPlus, FiCheck } from "react-icons/fi";
+import {
+  FiEdit2,
+  FiTrash2,
+  FiPlus,
+  FiCheck,
+  FiAlertCircle,
+} from "react-icons/fi";
 
 const CategoryManager = ({ categories, onAdd, onUpdate, onDelete }) => {
   const [inputName, setInputName] = useState("");
   const [selectedColor, setSelectedColor] = useState("#3182ce");
   const [editModeId, setEditModeId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null); // 삭제 확인 ID 상태 추가
 
   const colorPalette = [
     "#3182ce",
@@ -35,13 +42,13 @@ const CategoryManager = ({ categories, onAdd, onUpdate, onDelete }) => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("정말 삭제하시겠습니까?")) {
-      try {
-        await onDelete(id);
-      } catch (error) {
-        alert("삭제 중 오류가 발생했습니다.");
-      }
+  const confirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await onDelete(deleteConfirmId);
+      setDeleteConfirmId(null);
+    } catch (error) {
+      alert("삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -103,7 +110,7 @@ const CategoryManager = ({ categories, onAdd, onUpdate, onDelete }) => {
               </button>
               <button
                 className="danger"
-                onClick={() => handleDelete(cat.id)}
+                onClick={() => setDeleteConfirmId(cat.id)} // confirm 대신 ID 저장
                 title="삭제"
               >
                 <FiTrash2 size={16} />
@@ -112,6 +119,34 @@ const CategoryManager = ({ categories, onAdd, onUpdate, onDelete }) => {
           </li>
         ))}
       </ul>
+
+      {/* 삭제 확인 커스텀 모달 (TodoList 스타일 차용) */}
+      {deleteConfirmId && (
+        <div className="mini-modal-overlay">
+          <div className="mini-modal">
+            <div className="icon-area">
+              <FiAlertCircle />
+            </div>
+            <h3>카테고리 삭제</h3>
+            <p>
+              이 카테고리를 삭제하시겠습니까?
+              <br />
+              연결된 일정이 모두 분류 없음으로 변경됩니다.
+            </p>
+            <div className="modal-actions">
+              <button
+                className="btn-cancel"
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                취소
+              </button>
+              <button className="btn-confirm" onClick={confirmDelete}>
+                삭제하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
